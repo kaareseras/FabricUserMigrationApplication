@@ -1,13 +1,24 @@
 import sys
 import time
+from pathlib import Path
 
 from server import scan_jobs
+
+
+def test_find_powershell_uses_local_install(monkeypatch, tmp_path: Path) -> None:
+    local_shell = tmp_path / ".venv" / "powershell" / "pwsh"
+    local_shell.parent.mkdir(parents=True)
+    local_shell.touch()
+    monkeypatch.setattr(scan_jobs, "ROOT", tmp_path)
+    monkeypatch.setattr(scan_jobs.shutil, "which", lambda name: None)
+
+    assert scan_jobs.find_powershell() == str(local_shell)
 
 
 def test_scan_manager_tracks_progress_and_imports(monkeypatch) -> None:
     class FakeProcess:
         stdout = iter([
-            'FABRIC_PROGRESS {"percent":42,"stage":"Scanning"}\n',
+            'FABRIC_PROGRESS {"percent":42,"stage":"Scanning","current":5,"total":14}\n',
             "Found workspace\n",
         ])
 
@@ -32,6 +43,19 @@ def test_scan_manager_tracks_progress_and_imports(monkeypatch) -> None:
     assert "Found workspace" in status["logs"]
 
 
+def test_scan_manager_tracks_and_clears_workspace_progress() -> None:
+    manager = scan_jobs.ScanManager()
+    manager._job = {"status": "running", "logs": [], "workspaceProgress": None}
+
+    assert manager._handle_protocol_line(
+        'FABRIC_PROGRESS {"percent":38,"stage":"Workspace 5","current":5,"total":14}'
+    )
+    assert manager.status()["workspaceProgress"] == {"current": 5, "total": 14}
+
+    assert manager._handle_protocol_line('FABRIC_PROGRESS {"percent":72,"stage":"Scanning artifacts"}')
+    assert manager.status()["workspaceProgress"] is None
+
+
 def test_scan_manager_rejects_parallel_scan(monkeypatch) -> None:
     manager = scan_jobs.ScanManager()
     manager._job = {"status": "running", "logs": []}
@@ -43,3 +67,37 @@ def test_scan_manager_rejects_parallel_scan(monkeypatch) -> None:
         assert str(error) == "A scan is already running."
     else:
         raise AssertionError("Expected a parallel scan to be rejected")
+
+
+def test_scan_manager_tracks_structured_api_wait() -> None:
+    manager = scan_jobs.ScanManager()
+    manager._job = {"status": "running", "logs": [], "wait": None}
+    wait = {
+        "reason": "rateLimit",
+        "api": "WorkspaceAccess",
+        "seconds": 18,
+        "nextCallAtUtc": "2026-08-19T10:30:00Z",
+        "hourlyLimit": 200,
+    }
+
+    assert manager._handle_protocol_line(f"FABRIC_WAIT {scan_jobs.json.dumps(wait)}")
+    assert manager.status()["wait"] == wait
+    assert "limit 200/hour" in manager.status()["logs"][-1]
+
+    assert manager._handle_protocol_line("FABRIC_WAIT_END")
+    assert manager.status()["wait"] is None
+
+
+def test_scan_manager_tracks_structured_estimate() -> None:
+    manager = scan_jobs.ScanManager()
+    manager._job = {"status": "running", "logs": [], "estimate": None}
+    estimate = {
+        "workspaceCount": 1000,
+        "accessPacingSeconds": 18082,
+        "metadataBatches": 10,
+        "minimumSeconds": 18712,
+        "maximumSeconds": 19942,
+    }
+
+    assert manager._handle_protocol_line(f"FABRIC_ESTIMATE {scan_jobs.json.dumps(estimate)}")
+    assert manager.status()["estimate"] == estimate

@@ -43,6 +43,14 @@
           <p class="eyebrow">TENANT A · DISCOVERY</p>
           <h1 id="page-title">Adgangsoverblik</h1>
         </div>
+        <label class="language-picker">
+          <span>Language</span>
+          <select id="language-select" aria-label="Select language">
+            <option value="da">Dansk</option>
+            <option value="en">English</option>
+            <option value="pt">Português</option>
+          </select>
+        </label>
         <div class="snapshot">
           <span>Snapshot</span>
           <strong id="snapshot-date">Indlæser...</strong>
@@ -131,13 +139,30 @@
           <div class="scan-layout">
             <form id="scan-form" class="panel scan-form">
               <div class="panel-heading"><div><p class="eyebrow">TENANT DISCOVERY</p><h2>Nyt rettighedsscan</h2></div><span id="scan-availability" class="status-chip">Klar</span></div>
-              <label class="field-label" for="scan-tenant">Tenant ID</label>
-              <input id="scan-tenant" class="text-input" name="tenantId" required minlength="3" maxlength="100" pattern="[0-9a-fA-F-]+" autocomplete="off" placeholder="00000000-0000-0000-0000-000000000000">
+              <section class="auth-section" aria-live="polite">
+                <div class="auth-heading"><div><strong>Microsoft-konto</strong><span id="auth-stage">Kontrollerer login...</span></div><span id="auth-status" class="status-chip">Kontrollerer</span></div>
+                <p id="auth-account" class="auth-account hidden"></p>
+                <div class="auth-actions">
+                  <button id="auth-login" class="secondary-button" type="button">Log ind med Microsoft</button>
+                  <button id="auth-logout" class="secondary-button hidden" type="button">Log ud</button>
+                </div>
+                <p id="auth-error" class="form-error hidden"></p>
+              </section>
+              <label class="field-label" for="scan-tenant">Tenant</label>
+              <select id="scan-tenant" name="tenantId" required disabled>
+                <option value="">Log ind for at hente tenants</option>
+              </select>
+              <span id="tenant-hint" class="field-hint">Listen viser de tenants, Microsoft-kontoen har adgang til.</span>
               <label class="field-label" for="scan-limit">Maks. antal workspaces</label>
               <input id="scan-limit" class="text-input" name="workspaceLimit" type="number" min="0" max="100000" value="0">
               <span class="field-hint">0 scanner alle aktive workspaces.</span>
               <label class="check-row"><input id="scan-artifacts" type="checkbox" checked><span><strong>Power BI artifact-brugere</strong><small>Medtag item-adgang fra metadata-scanneren</small></span></label>
               <label class="check-row"><input id="scan-personal" type="checkbox"><span><strong>Personlige workspaces</strong><small>Medtag My Workspaces i discovery</small></span></label>
+              <div class="scan-estimate" aria-live="polite">
+                <div class="estimate-heading"><span>Estimeret scannertid</span><strong id="scan-estimate-duration">–</strong></div>
+                <span id="scan-estimate-basis"></span>
+                <small id="scan-estimate-breakdown"></small>
+              </div>
               <button id="scan-start" class="primary-button" type="submit">Start scan</button>
               <p id="scan-form-error" class="form-error hidden"></p>
             </form>
@@ -146,6 +171,10 @@
               <div class="scan-status-heading"><div><p class="eyebrow">LIVE STATUS</p><h2 id="scan-stage">Klar til scanning</h2></div><strong id="scan-percent">0%</strong></div>
               <div class="progress-track" role="progressbar" aria-label="Scan-fremdrift" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="scan-progress" class="progress-fill"></div></div>
               <div class="scan-meta"><span id="scan-started">Ikke startet</span><span id="scan-completed"></span></div>
+              <div id="scan-wait" class="scan-wait hidden" role="status">
+                <span class="scan-wait-icon" aria-hidden="true">◷</span>
+                <div><strong id="scan-wait-title"></strong><span id="scan-wait-detail"></span><small id="scan-wait-next"></small></div>
+              </div>
               <div id="scan-result" class="scan-result hidden"></div>
               <div class="log-heading"><strong>Proceslog</strong><span>Seneste 200 linjer</span></div>
               <pre id="scan-log" class="scan-log">Ingen aktivitet endnu.</pre>

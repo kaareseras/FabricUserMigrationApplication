@@ -1,4 +1,5 @@
 import json
+import os
 import shutil
 import subprocess
 import threading
@@ -10,6 +11,14 @@ from .database import DEFAULT_DATABASE, DEFAULT_SOURCE, ROOT, import_snapshot
 
 
 SCRIPT_PATH = ROOT / "scripts" / "Invoke-FabricPermissionDiscovery.ps1"
+
+
+def find_powershell() -> str | None:
+    shell = shutil.which("pwsh") or shutil.which("powershell")
+    if shell is not None:
+        return shell
+    local_shell = ROOT / ".venv" / "powershell" / "pwsh"
+    return str(local_shell) if local_shell.is_file() else None
 
 
 def utc_now() -> str:
@@ -28,10 +37,14 @@ class ScanManager:
             return {**self._job, "logs": list(self._job["logs"])}
 
     def start(self, tenant_id: str, workspace_limit: int, include_personal: bool, include_artifacts: bool) -> dict[str, Any]:
-        shell = shutil.which("pwsh") or shutil.which("powershell")
+        shell = find_powershell()
         if shell is None:
             raise RuntimeError("PowerShell is not installed on the server.")
-        if shutil.which("az") is None:
+        azure_cli = shutil.which("az")
+        if azure_cli is None:
+            local_cli = ROOT / ".venv" / "bin" / "az"
+            azure_cli = str(local_cli) if local_cli.exists() else None
+        if azure_cli is None:
             raise RuntimeError("Azure CLI is not installed on the server.")
 
         with self._lock:
@@ -45,6 +58,8 @@ class ScanManager:
                 "completedAtUtc": None,
                 "logs": [],
                 "result": None,
+                "wait": None,
+                "estimate": None,
             }
 
         command = [
@@ -66,7 +81,10 @@ class ScanManager:
         if include_artifacts:
             command.append("-IncludePowerBIArtifactUsers")
 
-        threading.Thread(target=self._run, args=(command,), daemon=True).start()
+        environment = os.environ.copy()
+        environment["PATH"] = f"{Path(azure_cli).parent}{os.pathsep}{environment.get('PATH', '')}"
+        environment.setdefault("DOTNET_SYSTEM_GLOBALIZATION_INVARIANT", "1")
+        threading.Thread(target=self._run, args=(command, environment), daemon=True).start()
         return self.status()
 
     def _update(self, **values: Any) -> None:
@@ -79,7 +97,37 @@ class ScanManager:
             if self._job is not None:
                 self._job["logs"] = [*self._job["logs"], message][-200:]
 
-    def _run(self, command: list[str]) -> None:
+    def _handle_protocol_line(self, line: str) -> bool:
+        if line.startswith("FABRIC_PROGRESS "):
+            progress = json.loads(line.removeprefix("FABRIC_PROGRESS "))
+            workspace_progress = None
+            if "current" in progress and "total" in progress:
+                workspace_progress = {"current": progress["current"], "total": progress["total"]}
+            self._update(
+                progress=progress["percent"],
+                stage=progress["stage"],
+                workspaceProgress=workspace_progress,
+            )
+            return True
+        if line.startswith("FABRIC_WAIT "):
+            wait = json.loads(line.removeprefix("FABRIC_WAIT "))
+            self._update(wait=wait)
+            limit = f"; limit {wait['hourlyLimit']}/hour" if wait.get("hourlyLimit") else ""
+            self._append_log(
+                f"Waiting {wait['seconds']}s before the next {wait.get('api') or 'API'} call "
+                f"({wait['reason']}{limit}); resumes at {wait['nextCallAtUtc']}."
+            )
+            return True
+        if line == "FABRIC_WAIT_END":
+            self._update(wait=None)
+            return True
+        if line.startswith("FABRIC_ESTIMATE "):
+            estimate = json.loads(line.removeprefix("FABRIC_ESTIMATE "))
+            self._update(estimate=estimate)
+            return True
+        return False
+
+    def _run(self, command: list[str], environment: dict[str, str]) -> None:
         self._update(status="running", stage="Starter discovery")
         try:
             process = subprocess.Popen(
@@ -90,23 +138,21 @@ class ScanManager:
                 text=True,
                 encoding="utf-8",
                 errors="replace",
+                env=environment,
             )
             assert process.stdout is not None
             for raw_line in process.stdout:
                 line = raw_line.strip()
                 if not line:
                     continue
-                if line.startswith("FABRIC_PROGRESS "):
-                    progress = json.loads(line.removeprefix("FABRIC_PROGRESS "))
-                    self._update(progress=progress["percent"], stage=progress["stage"])
-                else:
+                if not self._handle_protocol_line(line):
                     self._append_log(line)
 
             return_code = process.wait()
             if return_code != 0:
                 raise RuntimeError(f"Discovery process exited with code {return_code}.")
 
-            self._update(status="importing", progress=96, stage="Importerer nyt snapshot")
+            self._update(status="importing", progress=96, stage="Importerer nyt snapshot", wait=None)
             counts = import_snapshot(DEFAULT_SOURCE, DEFAULT_DATABASE)
             self._update(
                 status="completed",
@@ -114,10 +160,11 @@ class ScanManager:
                 stage="Scan gennemført",
                 completedAtUtc=utc_now(),
                 result=counts,
+                wait=None,
             )
         except Exception as error:
             self._append_log(str(error))
-            self._update(status="failed", stage="Scan fejlede", completedAtUtc=utc_now())
+            self._update(status="failed", stage="Scan fejlede", completedAtUtc=utc_now(), wait=None)
 
 
 scan_manager = ScanManager()

@@ -52,7 +52,9 @@ Koer derefter alle aktive, delte workspaces og inkluder Power BI artifact users:
     -IncludePowerBIArtifactUsers
 ```
 
-Tilfoej `-IncludePersonalWorkspaces`, hvis My Workspaces ogsaa skal med. Fabric Admin access-endpointet er begraenset til 200 requests i timen, saa en stor tenant kan blive throttled. Scriptet respekterer `Retry-After` og proever igen.
+Tilfoej `-IncludePersonalWorkspaces`, hvis My Workspaces ogsaa skal med. Scriptet holder mindst 18,1 sekunder mellem workspace access-kald og mindst 7,3 sekunder mellem Power BI metadata-kald. Det holder koerslen under graenserne paa henholdsvis 200 og 500 requests i timen med en lille sikkerhedsmargin. En scan af 1.000 workspace access-detaljer tager derfor mindst cirka fem timer.
+
+Ved 429, midlertidige netvaerksfejl og 5xx-svar respekterer scriptet `Retry-After` og bruger ellers eksponentiel backoff. Udlobne access tokens fornyes gennem Azure CLI. Efter hvert workspace og hver metadata-batch skrives et tenant-specifikt checkpoint. Hvis processen stoppes, fortsaetter naeste scan fra seneste checkpoint; checkpoints slettes efter en fuldt gennemfoert discovery, saa efterfoelgende planlagte scans stadig henter friske data.
 
 ## Output
 
@@ -78,9 +80,14 @@ python -m uvicorn server.app:app --host 127.0.0.1 --port 8080
 
 Aabn derefter `http://localhost:8080/` eller `http://localhost:8080/web/`. Dashboardet og API'et er read-only. En ny import bygges i en midlertidig database og erstatter foerst den aktive database, naar importen er gennemfoert.
 
+Et nyt scan kan startes fra dashboardets **Start scan**-visning. Vaelg **Log ind med Microsoft**, gennemfoer det personlige Microsoft-login i browservinduet, og vaelg derefter en tenant fra listen over tenants, kontoen har adgang til. Azure CLI-sessionen bruges af discovery-scriptet; adgangskoder og access tokens sendes ikke gennem dashboardet.
+
 ### Skalering
 
 - Discovery skriver scannerresultater batchvist som NDJSON, saa hele tenant-resultatet ikke holdes i PowerShell-hukommelsen.
+- Workspace access scannes sekventielt med 18,1 sekunders pacing og genoptages fra `workspace-access.checkpoint.ndjson` efter en afbrydelse.
+- Power BI metadata opdeles i batches paa hoejst 100 workspace-ID'er, paces til 500 API-kald i timen og genoptages fra `powerbi-artifact-users.checkpoint.ndjson`.
+- Checkpoint-filerne er kun interne arbejdsfiler og fjernes automatisk efter en gennemfoert discovery.
 - Importeren streamer JSON/NDJSON ind i normaliserede SQLite-tabeller med indeks og FTS5-soegning.
 - API'et returnerer maksimalt 100 permissions ad gangen; dashboardet bruger 50.
 - Soegning er debounced, og tidligere requests annulleres i browseren.

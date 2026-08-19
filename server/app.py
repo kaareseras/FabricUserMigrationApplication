@@ -11,6 +11,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
+from .azure_auth import azure_auth_manager
 from .database import DEFAULT_DATABASE, ROOT, connect
 from .scan_jobs import scan_manager
 
@@ -41,6 +42,27 @@ class ScanRequest(BaseModel):
 
 def rows(cursor: sqlite3.Cursor) -> list[dict[str, Any]]:
     return [dict(row) for row in cursor.fetchall()]
+
+
+@app.get("/api/auth/current")
+def current_auth() -> dict[str, Any]:
+    return azure_auth_manager.status()
+
+
+@app.post("/api/auth/login", status_code=202)
+def start_login() -> dict[str, Any]:
+    try:
+        return azure_auth_manager.start()
+    except RuntimeError as error:
+        raise HTTPException(status_code=409, detail=str(error)) from error
+
+
+@app.delete("/api/auth/current")
+def logout() -> dict[str, Any]:
+    try:
+        return azure_auth_manager.logout()
+    except RuntimeError as error:
+        raise HTTPException(status_code=409, detail=str(error)) from error
 
 
 @app.get("/api/scans/current")
@@ -226,7 +248,12 @@ def workspace_detail(workspace_id: str, database: Database) -> dict[str, Any]:
 @app.get("/api/coverage")
 def coverage(database: Database) -> dict[str, Any]:
     row = database.execute("SELECT value FROM metadata WHERE key = 'coverage'").fetchone()
-    return json.loads(row[0]) if row else {"covered": [], "notCovered": [], "apiNotes": []}
+    data = json.loads(row[0]) if row else {}
+    return {
+        "covered": data.get("covered") or [],
+        "notCovered": data.get("notCovered") or [],
+        "apiNotes": data.get("apiNotes") or [],
+    }
 
 
 app.mount("/assets", StaticFiles(directory=WEB_ROOT), name="assets")

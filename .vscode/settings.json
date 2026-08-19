@@ -1,4 +1,10 @@
 {
+    "terminal.integrated.defaultProfile.linux": "bash",
+    "terminal.integrated.profiles.linux": {
+        "bash": {
+            "path": "/bin/bash"
+        }
+    },
     "chat.agentSkillsLocations": {
         ".agents/skills": true,
         ".github/skills": true,
