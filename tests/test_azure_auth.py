@@ -72,3 +72,17 @@ def test_browser_login_reports_missing_cli(monkeypatch) -> None:
         assert str(error) == "Azure CLI is not installed on the server."
     else:
         raise AssertionError("Expected missing Azure CLI to be rejected")
+
+
+def test_docker_login_uses_device_code(monkeypatch) -> None:
+    monkeypatch.setenv("AZURE_LOGIN_USE_DEVICE_CODE", "true")
+
+    assert azure_auth.login_command("/usr/bin/az")[-1] == "--use-device-code"
+
+
+def test_device_code_is_parsed_from_azure_cli_output() -> None:
+    output = "Open https://microsoft.com/devicelogin and enter the code ABCD-EFGH to authenticate."
+
+    match = azure_auth.DEVICE_CODE_PATTERN.search(output)
+    assert match is not None
+    assert match.group(1) == "ABCD-EFGH"

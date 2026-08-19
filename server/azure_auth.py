@@ -10,6 +10,7 @@ from typing import Any
 
 LOGIN_URL = "https://microsoft.com/devicelogin"
 PROJECT_AZURE_CLI = Path(__file__).resolve().parents[1] / ".venv" / "bin" / "az"
+DEVICE_CODE_PATTERN = re.compile(r"\bcode[: ]+([A-Z0-9-]{6,})\b", re.IGNORECASE)
 
 
 def find_azure_cli() -> str | None:
@@ -17,6 +18,13 @@ def find_azure_cli() -> str | None:
     if cli is not None:
         return cli
     return str(PROJECT_AZURE_CLI) if PROJECT_AZURE_CLI.exists() else None
+
+
+def login_command(cli: str) -> list[str]:
+    command = [cli, "login", "--allow-no-subscriptions", "--output", "none", "--only-show-errors"]
+    if os.environ.get("AZURE_LOGIN_USE_DEVICE_CODE", "").lower() == "true":
+        command.append("--use-device-code")
+    return command
 
 
 class AzureAuthManager:
@@ -52,14 +60,7 @@ class AzureAuthManager:
                 "logs": [],
             }
 
-        command = [
-            cli,
-            "login",
-            "--allow-no-subscriptions",
-            "--output",
-            "none",
-            "--only-show-errors",
-        ]
+        command = login_command(cli)
         threading.Thread(target=self._run_login, args=(command,), daemon=True).start()
         return self.status()
 
@@ -191,9 +192,12 @@ class AzureAuthManager:
                 if not line:
                     continue
                 url_match = re.search(r"https?://[^\s]+", line)
+                code_match = DEVICE_CODE_PATTERN.search(line)
                 values: dict[str, Any] = {"stage": "Afventer personligt login i browseren"}
                 if url_match:
                     values["loginUrl"] = url_match.group(0).rstrip(".,)")
+                if code_match:
+                    values["userCode"] = code_match.group(1).upper()
                 self._update(**values)
                 self._append_log(line)
 

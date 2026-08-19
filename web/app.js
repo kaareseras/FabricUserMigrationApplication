@@ -26,6 +26,7 @@ const translations = {
     "Fabric workspace access API": "Fabric workspace access API", "Power BI metadata API": "Power BI metadata API"
     , "Estimeret scannertid": "Estimeret scannertid", "Ca. {minimum}–{maximum}": "Ca. {minimum}–{maximum}", "under 1 min.": "under 1 min.", "{hours} t. {minutes} min.": "{hours} t. {minutes} min.", "{minutes} min.": "{minutes} min.",
     "Scanner workspace {current}/{total}": "Scanner workspace {current}/{total}",
+    "Åbn Microsoft-login og indtast koden": "Åbn Microsoft-login og indtast koden", "Åbn Microsoft-login": "Åbn Microsoft-login",
     "Baseret på {count} workspaces fundet i tenant": "Baseret på {count} workspaces fundet i tenant", "Baseret på en grænse på op til {count} workspaces": "Baseret på en grænse på op til {count} workspaces", "Baseret på {count} workspaces i seneste snapshot": "Baseret på {count} workspaces i seneste snapshot",
     "API-pacing: {duration} · {batches} metadata-batch": "API-pacing: {duration} · {batches} metadata-batch", "API-pacing: {duration} · {batches} metadata-batches": "API-pacing: {duration} · {batches} metadata-batches", "API-pacing: {duration} · uden metadata-scan": "API-pacing: {duration} · uden metadata-scan", "Personlige workspaces kan øge det faktiske antal.": "Personlige workspaces kan øge det faktiske antal.", "Retries og Microsoft-behandlingstid kan forlænge scanningen.": "Retries og Microsoft-behandlingstid kan forlænge scanningen."
   },
@@ -57,6 +58,7 @@ Object.assign(translations.en, {
   "Fabric workspace access API": "Fabric workspace access API", "Power BI metadata API": "Power BI metadata API"
   , "Estimeret scannertid": "Estimated scan time", "Ca. {minimum}–{maximum}": "About {minimum}–{maximum}", "under 1 min.": "under 1 min", "{hours} t. {minutes} min.": "{hours}h {minutes}m", "{minutes} min.": "{minutes} min",
   "Scanner workspace {current}/{total}": "Scanning workspace {current}/{total}",
+  "Åbn Microsoft-login og indtast koden": "Open Microsoft sign-in and enter the code", "Åbn Microsoft-login": "Open Microsoft sign-in",
   "Baseret på {count} workspaces fundet i tenant": "Based on {count} workspaces found in the tenant", "Baseret på en grænse på op til {count} workspaces": "Based on a limit of up to {count} workspaces", "Baseret på {count} workspaces i seneste snapshot": "Based on {count} workspaces in the latest snapshot",
   "API-pacing: {duration} · {batches} metadata-batch": "API pacing: {duration} · {batches} metadata batch", "API-pacing: {duration} · {batches} metadata-batches": "API pacing: {duration} · {batches} metadata batches", "API-pacing: {duration} · uden metadata-scan": "API pacing: {duration} · without metadata scanning", "Personlige workspaces kan øge det faktiske antal.": "Personal workspaces may increase the actual count.", "Retries og Microsoft-behandlingstid kan forlænge scanningen.": "Retries and Microsoft processing time may extend the scan."
 });
@@ -89,6 +91,7 @@ Object.assign(translations.pt, {
   "Fabric workspace access API": "API de acesso a espaços de trabalho do Fabric", "Power BI metadata API": "API de metadados do Power BI"
   , "Estimeret scannertid": "Tempo estimado da análise", "Ca. {minimum}–{maximum}": "Cerca de {minimum}–{maximum}", "under 1 min.": "menos de 1 min", "{hours} t. {minutes} min.": "{hours} h {minutes} min", "{minutes} min.": "{minutes} min",
   "Scanner workspace {current}/{total}": "A analisar espaço de trabalho {current}/{total}",
+  "Åbn Microsoft-login og indtast koden": "Abra o início de sessão da Microsoft e introduza o código", "Åbn Microsoft-login": "Abrir início de sessão da Microsoft",
   "Baseret på {count} workspaces fundet i tenant": "Com base em {count} espaços de trabalho encontrados no tenant", "Baseret på en grænse på op til {count} workspaces": "Com base num limite de até {count} espaços de trabalho", "Baseret på {count} workspaces i seneste snapshot": "Com base em {count} espaços de trabalho no snapshot mais recente",
   "API-pacing: {duration} · {batches} metadata-batch": "Ritmo da API: {duration} · {batches} lote de metadados", "API-pacing: {duration} · {batches} metadata-batches": "Ritmo da API: {duration} · {batches} lotes de metadados", "API-pacing: {duration} · uden metadata-scan": "Ritmo da API: {duration} · sem análise de metadados", "Personlige workspaces kan øge det faktiske antal.": "Os espaços de trabalho pessoais podem aumentar o total real.", "Retries og Microsoft-behandlingstid kan forlænge scanningen.": "As repetições e o tempo de processamento da Microsoft podem prolongar a análise."
 });
@@ -411,6 +414,12 @@ function renderAuth() {
   byId("auth-stage").textContent = t(auth.stage);
   byId("auth-account").classList.toggle("hidden", !authenticated);
   byId("auth-account").textContent = authenticated ? `${auth.account.user} · ${auth.account.name}` : "";
+  const deviceLogin = waiting && Boolean(auth.userCode);
+  byId("auth-device").classList.toggle("hidden", !deviceLogin);
+  byId("auth-device").querySelector("span").textContent = t("Åbn Microsoft-login og indtast koden");
+  byId("auth-device-code").textContent = auth.userCode || "";
+  byId("auth-device-link").textContent = t("Åbn Microsoft-login");
+  byId("auth-device-link").href = auth.loginUrl || "https://microsoft.com/devicelogin";
   const tenantSelect = byId("scan-tenant");
   const selectedTenant = tenantSelect.value;
   tenantSelect.innerHTML = authenticated && auth.tenants?.length

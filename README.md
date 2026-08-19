@@ -1,131 +1,162 @@
-# Fabric User Migration Application
+# Fabric Access Atlas
 
-Dette repository starter med en read-only discovery-spike mod **Tenant A**. Formaalet er at validere, hvilke bruger- og adgangsdata Microsoft Fabric faktisk udstiller, foer vi designer selve webapplikationen og skrivefasen mod Tenant B.
+Fabric Access Atlas is a read-only Microsoft Fabric discovery dashboard. It signs in with a personal Microsoft account, scans the tenants available to that account, and stores a normalized permission snapshot in SQLite for fast search and review.
 
-## Foreloebig konklusion
+The Docker image includes the application, Python dependencies, Azure CLI, PowerShell, and the discovery script. A user only needs Docker with Docker Compose.
 
-API'erne kan hente en vaesentlig del af grundlaget, men ikke alle effektive Fabric-rettigheder gennem et enkelt API:
+## Quick start
 
-| Sikkerhedslag | Kan laeses tenant-wide? | API/status |
-| --- | --- | --- |
-| Workspaces | Ja | Fabric Admin `GET /v1/admin/workspaces` |
-| Direkte workspace-roller | Ja | Fabric Admin `GET /v1/admin/workspaces/{id}/users`, preview |
-| Power BI artifact users | Delvist | Power BI scanner API med `getArtifactUsers=true` |
-| Generisk item sharing for alle Fabric item-typer | Ikke dokumenteret som et samlet tenant-wide read API | Kraever yderligere afklaring eller item-specifikke API'er |
-| Entra-gruppemedlemskab og effektiv arv | Ja, men via Microsoft Graph | Ikke en del af Fabric API'et |
-| OneLake security-roller | Separat sikkerhedsmodel | Ikke daekket af denne spike |
-| SQL grants, database-roller og SQL RLS | Separat SQL-sikkerhedsmodel | Skal udlaeses gennem SQL pr. endpoint/database |
-| Semantic model RLS/OLS | Separat model-sikkerhed | Kraever Power BI/XMLA-specifik discovery |
-| KQL/Eventhouse-roller | Separat Kusto-sikkerhed | Kraever KQL/Kusto-specifik discovery |
-| Gateways, connections, apps og capacity admins | Separate administrationsflader | Kraever egne API'er |
+From the repository root, run:
 
-Det betyder, at en produktionsloesning boer opbygge et samlet rettighedskatalog fra flere collectors. Workspace-roller er et godt og testbart foerste trin, men de er ikke lig med en komplet effektiv adgangsmodel.
-
-## Forudsaetninger i Tenant A
-
-1. Installer [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli-windows).
-2. Brugeren, der logger ind, skal vaere Fabric administrator.
-3. Ved scanner-test skal de relevante admin API-indstillinger for metadata scanning vaere aktiveret.
-4. Log ind i Tenant A uden krav om et Azure-abonnement:
-
-```powershell
-az login --tenant <TENANT-A-ID> --allow-no-subscriptions
-```
-
-Spiken bruger delegated user authentication. Der gemmes ingen access tokens i outputtet.
-
-## Koer discovery
-
-Koer foerst en lille pilot paa fem workspaces:
-
-```powershell
-.\scripts\Invoke-FabricPermissionDiscovery.ps1 `
-    -TenantId '<TENANT-A-ID>' `
-    -WorkspaceLimit 5
-```
-
-Koer derefter alle aktive, delte workspaces og inkluder Power BI artifact users:
-
-```powershell
-.\scripts\Invoke-FabricPermissionDiscovery.ps1 `
-    -TenantId '<TENANT-A-ID>' `
-    -IncludePowerBIArtifactUsers
-```
-
-Tilfoej `-IncludePersonalWorkspaces`, hvis My Workspaces ogsaa skal med. Scriptet holder mindst 18,1 sekunder mellem workspace access-kald og mindst 7,3 sekunder mellem Power BI metadata-kald. Det holder koerslen under graenserne paa henholdsvis 200 og 500 requests i timen med en lille sikkerhedsmargin. En scan af 1.000 workspace access-detaljer tager derfor mindst cirka fem timer.
-
-Ved 429, midlertidige netvaerksfejl og 5xx-svar respekterer scriptet `Retry-After` og bruger ellers eksponentiel backoff. Udlobne access tokens fornyes gennem Azure CLI. Efter hvert workspace og hver metadata-batch skrives et tenant-specifikt checkpoint. Hvis processen stoppes, fortsaetter naeste scan fra seneste checkpoint; checkpoints slettes efter en fuldt gennemfoert discovery, saa efterfoelgende planlagte scans stadig henter friske data.
-
-## Output
-
-Filer skrives som standard under `artifacts/fabric-permission-discovery`:
-
-- `workspaces.json`: ra workspace-inventarliste.
-- `workspace-role-assignments.csv`: normaliserede direkte workspace-roller.
-- `workspace-errors.csv`: workspaces der ikke kunne laeses.
-- `powerbi-artifact-user-scans.ndjson`: raa scanner-resultater, en linje pr. batch paa hoejst 100 workspaces.
-- `coverage-report.json`: optaelling og eksplicit liste over daekkede og ikke-daekkede sikkerhedslag.
-
-Start med at kontrollere, at antal workspaces matcher Fabric Admin-portalen, og stikproev derefter rollelisten mod **Manage access** i 2-3 workspaces. Den kontrol afgør, om preview-endpointet er stabilt nok i kundens tenant til naeste fase.
-
-## Indekseret dashboard
-
-Dashboardet bruger en normaliseret SQLite-database og paginerede FastAPI-endpoints. Browseren indlaeser derfor aldrig hele tenant-snapshot'et. Importer det seneste discovery-output og start serveren fra repository-roden:
-
-```powershell
-python -m pip install -r requirements.txt
-python server\import_snapshot.py
-python -m uvicorn server.app:app --host 127.0.0.1 --port 8080
-```
-
-Aabn derefter `http://localhost:8080/` eller `http://localhost:8080/web/`. Dashboardet og API'et er read-only. En ny import bygges i en midlertidig database og erstatter foerst den aktive database, naar importen er gennemfoert.
-
-Et nyt scan kan startes fra dashboardets **Start scan**-visning. Vaelg **Log ind med Microsoft**, gennemfoer det personlige Microsoft-login i browservinduet, og vaelg derefter en tenant fra listen over tenants, kontoen har adgang til. Azure CLI-sessionen bruges af discovery-scriptet; adgangskoder og access tokens sendes ikke gennem dashboardet.
-
-### Skalering
-
-- Discovery skriver scannerresultater batchvist som NDJSON, saa hele tenant-resultatet ikke holdes i PowerShell-hukommelsen.
-- Workspace access scannes sekventielt med 18,1 sekunders pacing og genoptages fra `workspace-access.checkpoint.ndjson` efter en afbrydelse.
-- Power BI metadata opdeles i batches paa hoejst 100 workspace-ID'er, paces til 500 API-kald i timen og genoptages fra `powerbi-artifact-users.checkpoint.ndjson`.
-- Checkpoint-filerne er kun interne arbejdsfiler og fjernes automatisk efter en gennemfoert discovery.
-- Importeren streamer JSON/NDJSON ind i normaliserede SQLite-tabeller med indeks og FTS5-soegning.
-- API'et returnerer maksimalt 100 permissions ad gangen; dashboardet bruger 50.
-- Soegning er debounced, og tidligere requests annulleres i browseren.
-- Koer `python tests\scale_benchmark.py` for en lokal benchmark med 10.000 users og 100.000 permissions.
-
-SQLite er velegnet til en enkelt read-only applikationsinstans og mange millioner rettighedsrækker. Hvis loesningen senere skal betjene mange samtidige dashboard-brugere eller flere app-instanser, boer samme normaliserede model flyttes til Azure SQL eller PostgreSQL, og snapshot-importen koeres som et separat job.
-
-## Docker
-
-Byg og start applikationen med Docker Compose fra repository-roden:
-
-```powershell
+```bash
 docker compose up --build -d
+```
+
+Open [http://localhost:8080](http://localhost:8080), select **Start scan**, and then:
+
+1. Select **Sign in with Microsoft**, open the Microsoft link shown by the dashboard, and enter the displayed one-time code.
+2. Choose one of the tenants available to the signed-in account.
+3. Keep the workspace limit at `0` to scan every active workspace, or enter a smaller number for a pilot scan.
+4. Choose whether to include Power BI artifact users and personal workspaces.
+5. Start the scan.
+
+No snapshot files, local Python installation, Azure CLI installation, or PowerShell installation are required. On first startup, the container creates an empty dashboard database. The first completed scan replaces it with live tenant data.
+
+Check the service:
+
+```bash
 docker compose ps
+docker compose logs -f app
 ```
 
-Compose monterer `artifacts/fabric-permission-discovery` read-only og gemmer den importerede SQLite-database i volume `fabric-data`. Aabn `http://localhost:8080/`. Naar discovery-snapshottet er opdateret, kan databasen genimporteres ved naeste start:
+Stop it with:
 
-```powershell
-$env:FORCE_SNAPSHOT_IMPORT = 'true'
-docker compose up --build -d
-Remove-Item Env:FORCE_SNAPSHOT_IMPORT
+```bash
+docker compose down
 ```
 
-Stop applikationen med `docker compose down`. Tilfoej `--volumes`, hvis den importerede database ogsaa skal slettes.
+## Persistent data
 
-## Dev container
+Docker Compose creates three named volumes:
 
-Repository'et indeholder en VS Code dev container baseret paa development-targetet i `Dockerfile`. Koer **Dev Containers: Reopen in Container**, og start derefter serveren i container-terminalen:
+| Volume | Contents |
+| --- | --- |
+| `fabric-data` | The normalized SQLite dashboard database |
+| `fabric-artifacts` | Discovery output and resumable scan checkpoints |
+| `azure-config` | The Azure CLI login session |
+
+Normal image rebuilds and container restarts preserve all three volumes. To remove all local application data and the saved Microsoft login, run:
+
+```bash
+docker compose down --volumes
+```
+
+To rebuild the SQLite database from the existing discovery files, run:
+
+```bash
+FORCE_SNAPSHOT_IMPORT=true docker compose up -d
+```
+
+Then start it normally again so future restarts do not force another import:
+
+```bash
+docker compose up -d
+```
+
+## Authentication and permissions
+
+Discovery uses delegated Azure CLI authentication. Passwords and access tokens are not sent through the dashboard or written to discovery output.
+
+The signed-in account must have permission to call the Fabric administrator APIs. In most environments this means the account is a Fabric administrator. Power BI metadata scanning must also be enabled in the tenant settings when artifact-user discovery is selected.
+
+The tenant selector lists tenants available to the signed-in Microsoft account. Azure subscriptions are not required.
+
+## What the scan collects
+
+| Security layer | Coverage | Source |
+| --- | --- | --- |
+| Active workspaces | Included | Fabric Admin `GET /v1/admin/workspaces` |
+| Direct workspace roles | Included | Fabric Admin workspace access details preview API |
+| Power BI artifact users | Optional | Power BI metadata scanner with `getArtifactUsers=true` |
+| Nested Microsoft Entra group inheritance | Not expanded | Requires Microsoft Graph |
+| Generic sharing for every Fabric item type | Not fully exposed tenant-wide | Requires additional or item-specific APIs |
+| OneLake security roles | Not included | Separate OneLake security model |
+| SQL grants, roles, RLS, and object permissions | Not included | Requires SQL discovery per endpoint or database |
+| Semantic model RLS and OLS | Not included | Requires Power BI or XMLA-specific discovery |
+| KQL database and Eventhouse roles | Not included | Requires KQL or Kusto-specific discovery |
+| Gateways, connections, apps, capacities, and tenant admins | Not included | Separate administration APIs |
+
+Workspace roles are a useful migration baseline, but they are not a complete effective-access model. A production migration should combine multiple specialized collectors.
+
+## Large tenant behavior
+
+The scanner is designed for long-running tenant discovery:
+
+- Workspace access calls are paced at 18.1 seconds to remain below the preview API limit of 200 requests per hour.
+- Power BI metadata requests contain at most 100 workspace IDs and are paced below 500 requests per hour.
+- HTTP 429 responses, temporary network failures, and transient 5xx responses are retried using `Retry-After` or exponential backoff.
+- Expired access tokens are refreshed through Azure CLI.
+- Workspace and metadata progress is checkpointed after each completed unit of work.
+- An interrupted scan resumes from its tenant-specific checkpoints.
+- The dashboard shows workspace progress, API waits, and an estimated duration based on workspace count and metadata batches.
+
+Because of the API limit, scanning access details for 1,000 workspaces takes at least about five hours. Keep the container running until the scan completes.
+
+## Discovery output
+
+The `fabric-artifacts` volume contains:
+
+- `workspaces.json`: raw workspace inventory.
+- `workspace-role-assignments.csv`: normalized direct workspace roles.
+- `workspace-errors.csv`: workspaces that could not be read.
+- `powerbi-artifact-user-scans.ndjson`: metadata scanner results, one line per batch.
+- `coverage-report.json`: covered and unsupported security layers.
+- `*.checkpoint.ndjson`: internal resume data, removed after a successful complete scan.
+
+The importer streams JSON and NDJSON into indexed SQLite tables. The API is paginated and returns at most 100 permissions per request; the dashboard requests 50 at a time.
+
+## Local development
+
+The recommended development environment is the included VS Code dev container. Select **Dev Containers: Reopen in Container**, then run:
 
 ```bash
 python server/import_snapshot.py
 python -m uvicorn server.app:app --host 0.0.0.0 --port 8080 --reload
 ```
 
-Port `8080` viderestilles automatisk. Tests kan koeres med `python -m pytest`.
+Run tests with:
 
-## Officiel dokumentation
+```bash
+python -m pytest
+```
+
+For a local scale check with 10,000 users and 100,000 permissions:
+
+```bash
+python tests/scale_benchmark.py
+```
+
+## Manual discovery
+
+Docker users should normally start scans from the dashboard. To run the collector directly in a prepared PowerShell environment:
+
+```powershell
+./scripts/Invoke-FabricPermissionDiscovery.ps1 `
+    -TenantId '<TENANT-ID>' `
+    -IncludePowerBIArtifactUsers
+```
+
+Add `-WorkspaceLimit 5` for a small pilot or `-IncludePersonalWorkspaces` to include My Workspaces. Output defaults to `artifacts/fabric-permission-discovery`.
+
+## API and operational notes
+
+- The dashboard and discovery operations are read-only against Microsoft Fabric.
+- Snapshot imports are built in a temporary SQLite database and replace the active database only after a successful import.
+- SQLite is suitable for one application instance and millions of permission rows.
+- Multiple application instances or many concurrent users should use PostgreSQL or Azure SQL and a separate import worker.
+- The health endpoint is available at [http://localhost:8080/api/health](http://localhost:8080/api/health).
+
+## Microsoft documentation
 
 - [List Workspaces](https://learn.microsoft.com/rest/api/fabric/admin/workspaces/list-workspaces)
 - [List Workspace Access Details](https://learn.microsoft.com/rest/api/fabric/admin/workspaces/list-workspace-access-details)

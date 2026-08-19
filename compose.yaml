@@ -7,10 +7,14 @@ services:
       - "8080:8080"
     environment:
       FORCE_SNAPSHOT_IMPORT: ${FORCE_SNAPSHOT_IMPORT:-false}
+      AZURE_LOGIN_USE_DEVICE_CODE: "true"
     volumes:
-      - ./artifacts/fabric-permission-discovery:/app/artifacts/fabric-permission-discovery:ro
+      - fabric-artifacts:/app/artifacts/fabric-permission-discovery
       - fabric-data:/app/data
+      - azure-config:/app/.azure
     restart: unless-stopped
 
 volumes:
+  fabric-artifacts:
   fabric-data:
+  azure-config:

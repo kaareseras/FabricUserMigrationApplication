@@ -142,6 +142,11 @@
               <section class="auth-section" aria-live="polite">
                 <div class="auth-heading"><div><strong>Microsoft-konto</strong><span id="auth-stage">Kontrollerer login...</span></div><span id="auth-status" class="status-chip">Kontrollerer</span></div>
                 <p id="auth-account" class="auth-account hidden"></p>
+                <div id="auth-device" class="auth-device hidden">
+                  <span>Åbn Microsoft-login og indtast koden</span>
+                  <code id="auth-device-code"></code>
+                  <a id="auth-device-link" href="https://microsoft.com/devicelogin" target="_blank" rel="noopener">Åbn Microsoft-login</a>
+                </div>
                 <div class="auth-actions">
                   <button id="auth-login" class="secondary-button" type="button">Log ind med Microsoft</button>
                   <button id="auth-logout" class="secondary-button hidden" type="button">Log ud</button>
