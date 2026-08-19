@@ -1,6 +1,6 @@
 # Fabric Access Atlas
 
-Fabric Access Atlas is a read-only Microsoft Fabric discovery dashboard. It signs in with a personal Microsoft account, scans the tenants available to that account, and stores a normalized permission snapshot in SQLite for fast search and review.
+Fabric Access Atlas is a Microsoft Fabric discovery and governed permission migration dashboard. It signs in with a personal Microsoft account, scans the tenants available to that account, stores a normalized permission snapshot in SQLite, maps existing users to replacement users, and can add supported mapped permissions after an explicit review and confirmation step.
 
 The Docker image includes the application, Python dependencies, Azure CLI, PowerShell, and the discovery script. A user only needs Docker with Docker Compose.
 
@@ -70,6 +70,40 @@ Discovery uses delegated Azure CLI authentication. Passwords and access tokens a
 The signed-in account must have permission to call the Fabric administrator APIs. In most environments this means the account is a Fabric administrator. Power BI metadata scanning must also be enabled in the tenant settings when artifact-user discovery is selected.
 
 The tenant selector lists tenants available to the signed-in Microsoft account. Azure subscriptions are not required.
+
+The user mapping view also reads the selected tenant's Microsoft Entra users through Microsoft Graph. The signed-in account and Azure CLI application must have delegated permission to list users, such as `User.Read.All` or `Directory.Read.All`, with administrator consent where the tenant requires it.
+
+Applying mapped permissions requires delegated `Workspace.ReadWrite.All` for Fabric workspace roles and `Dataset.ReadWrite.All` for Power BI semantic model permissions. The caller must have enough rights in each workspace and must have `ReadReshare` on each semantic model being shared.
+
+## User mapping
+
+Select **User mapping**, choose a tenant, and load the tenant directory. The view lists tenant users found in the Fabric permission snapshot and allows each one to be mapped to a tenant user with no Fabric presence.
+
+Mappings are one-to-one: each Fabric user has at most one target, and a target cannot be assigned to another Fabric user. They are stored in `user-mappings.db` in the persistent `fabric-data` volume and survive scans, image rebuilds, directory refreshes, and container restarts.
+
+### Applying mapped permissions
+
+The permission migration is additive. It grants rights to mapped target users and never removes or changes rights belonging to source users.
+
+1. Select **Review plan** after mappings are complete.
+2. Review the workspace-role, semantic-model, and unsupported counts.
+3. Confirm that the plan has been reviewed.
+4. Select **Apply permissions** and follow live progress, waits, failures, and results.
+
+The migration copies these permissions exactly:
+
+- Fabric workspace roles: `Admin`, `Member`, `Contributor`, and `Viewer`.
+- Power BI semantic model rights supported by the grant API: `Read`, `ReadReshare`, `ReadExplore`, and `ReadReshareExplore`.
+
+Supported semantic model rights are replayed as explicit grants even when the copied workspace role currently provides the same effective access. Other item rights already supplied by the copied workspace role are classified as covered; an extra direct item right that exceeds the workspace role is still planned or reported independently.
+
+For Fabric item types without a public item-permission write API, the migration uses the copied workspace role as the exact governed workaround when that role includes every discovered capability (read, write, reshare, and execute as applicable). The review plan lists these entries under **Covered by workspace role** so the fallback remains explicit and auditable.
+
+Other artifact rights are reported but not applied. Microsoft does not expose one universal write API that can safely reproduce every scanned report, dashboard, dataflow, datamart, or write-level semantic-model right. The application never substitutes a broader or weaker right.
+
+Migration operations are paced conservatively and retry HTTP 429, temporary 5xx responses, network failures, and expired tokens. Successful operations are checkpointed in `data/permission-migrations/<tenant-id>.checkpoint.ndjson`, so interrupted or cancelled jobs resume without replaying completed writes. A detailed result report, including unsupported rights and failures, is written to `data/permission-migrations/<tenant-id>.result.json`.
+
+Discovery and permission migration cannot run simultaneously. This keeps the permission plan tied to one stable snapshot. A workspace can contain at most 1,000 direct users or groups according to the Fabric API limit.
 
 ## What the scan collects
 
@@ -150,7 +184,7 @@ Add `-WorkspaceLimit 5` for a small pilot or `-IncludePersonalWorkspaces` to inc
 
 ## API and operational notes
 
-- The dashboard and discovery operations are read-only against Microsoft Fabric.
+- Discovery operations are read-only against Microsoft Fabric. Permission migration performs explicit, additive writes only after plan review and confirmation.
 - Snapshot imports are built in a temporary SQLite database and replace the active database only after a successful import.
 - SQLite is suitable for one application instance and millions of permission rows.
 - Multiple application instances or many concurrent users should use PostgreSQL or Azure SQL and a separate import worker.

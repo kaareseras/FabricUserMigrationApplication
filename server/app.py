@@ -13,7 +13,9 @@ from pydantic import BaseModel, Field
 
 from .azure_auth import azure_auth_manager
 from .database import DEFAULT_DATABASE, ROOT, connect
+from .permission_migration import ACTIVE_STATUSES, build_permission_plan, permission_migration_manager
 from .scan_jobs import scan_manager
+from .user_mappings import delete_user_mapping, mapping_view, set_user_mapping, sync_directory_users
 
 
 WEB_ROOT = ROOT / "web"
@@ -38,6 +40,14 @@ class ScanRequest(BaseModel):
     workspace_limit: int = Field(default=0, alias="workspaceLimit", ge=0, le=100000)
     include_personal_workspaces: bool = Field(default=False, alias="includePersonalWorkspaces")
     include_power_bi_artifact_users: bool = Field(default=True, alias="includePowerBIArtifactUsers")
+
+
+class UserMappingRequest(BaseModel):
+    target_user_id: str = Field(alias="targetUserId", min_length=1, max_length=200)
+
+
+class PermissionMigrationRequest(BaseModel):
+    confirmed: bool
 
 
 def rows(cursor: sqlite3.Cursor) -> list[dict[str, Any]]:
@@ -72,6 +82,8 @@ def current_scan() -> dict[str, Any]:
 
 @app.post("/api/scans", status_code=202)
 def start_scan(request: ScanRequest) -> dict[str, Any]:
+    if permission_migration_manager.status()["status"] in ACTIVE_STATUSES:
+        raise HTTPException(status_code=409, detail="A permission migration is running. Wait for it to finish or cancel it before scanning.")
     try:
         return scan_manager.start(
             request.tenant_id,
@@ -254,6 +266,66 @@ def coverage(database: Database) -> dict[str, Any]:
         "notCovered": data.get("notCovered") or [],
         "apiNotes": data.get("apiNotes") or [],
     }
+
+
+@app.post("/api/tenants/{tenant_id}/directory-users/sync")
+def sync_tenant_directory(tenant_id: str) -> dict[str, Any]:
+    try:
+        count = sync_directory_users(tenant_id)
+    except RuntimeError as error:
+        raise HTTPException(status_code=502, detail=str(error)) from error
+    return {"tenantId": tenant_id, "userCount": count}
+
+
+@app.get("/api/tenants/{tenant_id}/user-mappings")
+def user_mappings(tenant_id: str, database: Database) -> dict[str, Any]:
+    return mapping_view(tenant_id, database)
+
+
+@app.put("/api/tenants/{tenant_id}/user-mappings/{source_user_id}")
+def update_user_mapping(tenant_id: str, source_user_id: str, request: UserMappingRequest, database: Database) -> dict[str, Any]:
+    try:
+        set_user_mapping(tenant_id, source_user_id, request.target_user_id, database)
+    except ValueError as error:
+        raise HTTPException(status_code=409, detail=str(error)) from error
+    return mapping_view(tenant_id, database)
+
+
+@app.delete("/api/tenants/{tenant_id}/user-mappings/{source_user_id}")
+def remove_user_mapping(tenant_id: str, source_user_id: str, database: Database) -> dict[str, Any]:
+    delete_user_mapping(tenant_id, source_user_id)
+    return mapping_view(tenant_id, database)
+
+
+@app.get("/api/tenants/{tenant_id}/permission-migration/plan")
+def permission_migration_plan(tenant_id: str, database: Database) -> dict[str, Any]:
+    return build_permission_plan(tenant_id, database)
+
+
+@app.get("/api/permission-migrations/current")
+def current_permission_migration() -> dict[str, Any]:
+    return permission_migration_manager.status()
+
+
+@app.post("/api/tenants/{tenant_id}/permission-migration", status_code=202)
+def start_permission_migration(tenant_id: str, request: PermissionMigrationRequest, database: Database) -> dict[str, Any]:
+    if not request.confirmed:
+        raise HTTPException(status_code=400, detail="Explicit confirmation is required before permissions are written.")
+    if scan_manager.status()["status"] in {"queued", "running", "importing"}:
+        raise HTTPException(status_code=409, detail="A discovery scan is running. Wait for it to finish before applying permissions.")
+    plan = build_permission_plan(tenant_id, database)
+    try:
+        return permission_migration_manager.start(tenant_id, plan)
+    except RuntimeError as error:
+        raise HTTPException(status_code=409, detail=str(error)) from error
+
+
+@app.delete("/api/permission-migrations/current")
+def cancel_permission_migration() -> dict[str, Any]:
+    try:
+        return permission_migration_manager.cancel()
+    except RuntimeError as error:
+        raise HTTPException(status_code=409, detail=str(error)) from error
 
 
 app.mount("/assets", StaticFiles(directory=WEB_ROOT), name="assets")

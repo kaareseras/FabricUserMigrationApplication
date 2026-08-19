@@ -96,6 +96,47 @@ Object.assign(translations.pt, {
   "API-pacing: {duration} · {batches} metadata-batch": "Ritmo da API: {duration} · {batches} lote de metadados", "API-pacing: {duration} · {batches} metadata-batches": "Ritmo da API: {duration} · {batches} lotes de metadados", "API-pacing: {duration} · uden metadata-scan": "Ritmo da API: {duration} · sem análise de metadados", "Personlige workspaces kan øge det faktiske antal.": "Os espaços de trabalho pessoais podem aumentar o total real.", "Retries og Microsoft-behandlingstid kan forlænge scanningen.": "As repetições e o tempo de processamento da Microsoft podem prolongar a análise."
 });
 
+Object.assign(translations.en, {
+  "Brugermapping": "User mapping", "Brugermapping for migration": "Migration user mapping", "Map nuværende brugere til nye brugere": "Map current users to new users",
+  "Listen viser tenant-brugere med Fabric-adgang. Hver kan kun mappes til én tenant-bruger uden Fabric-adgang, og samme målbruger kan ikke genbruges.": "The list shows tenant users with Fabric access. Each can only map to one tenant user without Fabric access, and the same target user cannot be reused.",
+  "Hent tenant-brugere": "Load tenant users", "Nuværende Fabric-bruger": "Current Fabric user", "Ny bruger uden Fabric-adgang": "New user without Fabric access",
+  "Vælg en tenant og hent tenant-brugerne.": "Select a tenant and load its users.", "Vælg ny bruger": "Select new user", "Ikke mappet": "Not mapped", "Mappet": "Mapped",
+  "{sources} Fabric-brugere · {targets} mulige mål · {mapped} mappet": "{sources} Fabric users · {targets} possible targets · {mapped} mapped",
+  "Ingen tenant-brugere med Fabric-adgang blev fundet.": "No tenant users with Fabric access were found.", "Henter brugere...": "Loading users..."
+});
+Object.assign(translations.pt, {
+  "Brugermapping": "Mapeamento de utilizadores", "Brugermapping for migration": "Mapeamento de utilizadores para migração", "Map nuværende brugere til nye brugere": "Mapear utilizadores atuais para novos utilizadores",
+  "Listen viser tenant-brugere med Fabric-adgang. Hver kan kun mappes til én tenant-bruger uden Fabric-adgang, og samme målbruger kan ikke genbruges.": "A lista mostra utilizadores do tenant com acesso ao Fabric. Cada um só pode ser mapeado para um utilizador sem acesso ao Fabric, e o mesmo destino não pode ser reutilizado.",
+  "Hent tenant-brugere": "Carregar utilizadores do tenant", "Nuværende Fabric-bruger": "Utilizador atual do Fabric", "Ny bruger uden Fabric-adgang": "Novo utilizador sem acesso ao Fabric",
+  "Vælg en tenant og hent tenant-brugerne.": "Selecione um tenant e carregue os utilizadores.", "Vælg ny bruger": "Selecionar novo utilizador", "Ikke mappet": "Não mapeado", "Mappet": "Mapeado",
+  "{sources} Fabric-brugere · {targets} mulige mål · {mapped} mappet": "{sources} utilizadores do Fabric · {targets} destinos possíveis · {mapped} mapeados",
+  "Ingen tenant-brugere med Fabric-adgang blev fundet.": "Não foram encontrados utilizadores do tenant com acesso ao Fabric.", "Henter brugere...": "A carregar utilizadores..."
+});
+Object.assign(translations.en, {
+  "PERMISSION MIGRATION": "PERMISSION MIGRATION", "Anvend de mappede rettigheder": "Apply mapped permissions", "Rettigheder tilføjes til de nye brugere. De oprindelige brugeres rettigheder ændres ikke.": "Permissions are added to new users. The original users' permissions are not changed.",
+  "Gennemgå plan": "Review plan", "Indlæser plan...": "Loading plan...", "Workspace-roller": "Workspace roles", "Semantic model-rettigheder": "Semantic model permissions", "Dækket af workspace-rolle": "Covered by workspace role", "Kan ikke kopieres præcist": "Cannot be copied exactly", "Kun rettigheder, som Microsofts API'er kan kopiere præcist, bliver anvendt. Ikke-understøttede rettigheder registreres i resultatrapporten.": "Only permissions that Microsoft's APIs can reproduce exactly are applied. Unsupported permissions are recorded in the result report.",
+  "Ikke-understøttede rettigheder": "Unsupported permissions", "{count} rettigheder kan ikke kopieres præcist": "{count} permissions cannot be copied exactly", "{count} workspace-roller anvendes": "{count} workspace roles will be applied", "{count} semantic model-rettigheder anvendes": "{count} semantic model permissions will be applied", "{count} rettigheder dækkes af workspace-roller": "{count} permissions are covered by workspace roles", "Kildebruger": "Source user", "Målbruger": "Target user", "Detalje": "Detail", "Anvendes præcist": "Applied exactly", "Dækket af workspace-rollen {role}": "Covered by workspace role {role}",
+  "Jeg har gennemgået planen": "I have reviewed the plan", "Dette starter en skriveoperation mod den valgte tenant.": "This starts a write operation against the selected tenant.", "Anvend rettigheder": "Apply permissions", "Klar til rettighedsmigration": "Ready for permission migration", "Rettighedsmigration": "Permission migration", "Annuller job": "Cancel job",
+  "Ready to apply mapped permissions": "Ready to apply mapped permissions", "Preparing permission migration": "Preparing permission migration", "Applying mapped permissions": "Applying mapped permissions", "Cancelling after the current request": "Cancelling after the current request", "Permission migration completed": "Permission migration completed", "Permission migration cancelled": "Permission migration cancelled", "Permission migration failed": "Permission migration failed",
+  "Rettighed {current}/{total}": "Permission {current}/{total}", "Venter {seconds} sek. før næste API-kald": "Waiting {seconds}s before the next API call", "Kontrolleret og klar": "Reviewed and ready", "Fejl under migration": "Migration failures", applied: "applied", alreadyApplied: "already applied", failed: "failed", unsupported: "unsupported", total: "total"
+});
+Object.assign(translations.pt, {
+  "PERMISSION MIGRATION": "MIGRAÇÃO DE PERMISSÕES", "Anvend de mappede rettigheder": "Aplicar permissões mapeadas", "Rettigheder tilføjes til de nye brugere. De oprindelige brugeres rettigheder ændres ikke.": "As permissões são adicionadas aos novos utilizadores. As permissões dos utilizadores originais não são alteradas.",
+  "Gennemgå plan": "Rever plano", "Indlæser plan...": "A carregar plano...", "Workspace-roller": "Funções do espaço de trabalho", "Semantic model-rettigheder": "Permissões do modelo semântico", "Dækket af workspace-rolle": "Coberto pela função do espaço de trabalho", "Kan ikke kopieres præcist": "Não é possível copiar exatamente", "Kun rettigheder, som Microsofts API'er kan kopiere præcist, bliver anvendt. Ikke-understøttede rettigheder registreres i resultatrapporten.": "Apenas são aplicadas permissões que as APIs da Microsoft conseguem reproduzir exatamente. As permissões não suportadas são registadas no relatório.",
+  "Ikke-understøttede rettigheder": "Permissões não suportadas", "{count} rettigheder kan ikke kopieres præcist": "Não é possível copiar exatamente {count} permissões", "{count} workspace-roller anvendes": "Serão aplicadas {count} funções do espaço de trabalho", "{count} semantic model-rettigheder anvendes": "Serão aplicadas {count} permissões de modelo semântico", "{count} rettigheder dækkes af workspace-roller": "{count} permissões são cobertas por funções do espaço de trabalho", "Kildebruger": "Utilizador de origem", "Målbruger": "Utilizador de destino", "Detalje": "Detalhe", "Anvendes præcist": "Aplicada exatamente", "Dækket af workspace-rollen {role}": "Coberta pela função do espaço de trabalho {role}",
+  "Jeg har gennemgået planen": "Revi o plano", "Dette starter en skriveoperation mod den valgte tenant.": "Isto inicia uma operação de escrita no tenant selecionado.", "Anvend rettigheder": "Aplicar permissões", "Klar til rettighedsmigration": "Pronto para migrar permissões", "Rettighedsmigration": "Migração de permissões", "Annuller job": "Cancelar tarefa",
+  "Ready to apply mapped permissions": "Pronto para aplicar permissões mapeadas", "Preparing permission migration": "A preparar migração de permissões", "Applying mapped permissions": "A aplicar permissões mapeadas", "Cancelling after the current request": "A cancelar após o pedido atual", "Permission migration completed": "Migração de permissões concluída", "Permission migration cancelled": "Migração de permissões cancelada", "Permission migration failed": "A migração de permissões falhou",
+  "Rettighed {current}/{total}": "Permissão {current}/{total}", "Venter {seconds} sek. før næste API-kald": "A aguardar {seconds} s antes da próxima chamada à API", "Kontrolleret og klar": "Revisto e pronto", "Fejl under migration": "Falhas na migração", applied: "aplicadas", alreadyApplied: "já aplicadas", failed: "falharam", unsupported: "não suportadas", total: "total"
+});
+Object.assign(translations.da, {
+  "The available Microsoft write APIs cannot reproduce this item type and access right exactly.": "De tilgængelige Microsoft-skrive-API'er kan ikke genskabe denne item-type og rettighed præcist.",
+  "This workspace role is not supported by the Fabric role-assignment API.": "Denne workspace-rolle understøttes ikke af Fabrics API til rolletildeling."
+});
+Object.assign(translations.pt, {
+  "The available Microsoft write APIs cannot reproduce this item type and access right exactly.": "As APIs de escrita disponíveis da Microsoft não conseguem reproduzir exatamente este tipo de item e direito de acesso.",
+  "This workspace role is not supported by the Fabric role-assignment API.": "Esta função do espaço de trabalho não é suportada pela API de atribuição de funções do Fabric."
+});
+
 function detectLanguage() {
   const stored = localStorage.getItem(LANGUAGE_STORAGE_KEY);
   if (LOCALES[stored]) return stored;
@@ -114,6 +155,13 @@ const state = {
   facets: null,
   permissions: { items: [], page: 1, pageSize: 50, total: 0, totalPages: 1 },
   workspaces: { items: [], page: 1, pageSize: 24, total: 0, totalPages: 1 },
+  userMappings: null,
+  mappingBusy: false,
+  migrationPlan: null,
+  migrationPlanLoading: false,
+  migrationPlanDetail: "unsupported",
+  migrationJob: null,
+  migrationTimer: null,
   permissionRequest: null,
   workspaceRequest: null,
   auth: null,
@@ -162,6 +210,8 @@ function setLanguage(language, persist = true) {
   if (state.coverage) renderCoverage();
   if (state.permissions) renderPermissions();
   if (state.workspaces) renderWorkspaces();
+  renderUserMappings();
+  renderPermissionMigration();
   renderAuth();
   renderScan();
   if (state.summary) byId("snapshot-date").textContent = formatDate(state.summary.generatedAtUtc, true);
@@ -342,6 +392,241 @@ function renderWorkspaces() {
   renderPagination("workspaces-pagination", state.workspaces, (page) => { state.workspaces.page = page; loadWorkspaces(); });
 }
 
+async function loadUserMappings() {
+  const tenantId = byId("mapping-tenant").value;
+  if (!tenantId) { state.userMappings = null; renderUserMappings(); renderPermissionMigration(); return; }
+  try {
+    state.userMappings = await api(`/tenants/${encodeURIComponent(tenantId)}/user-mappings`);
+    byId("mapping-error").classList.add("hidden");
+    renderUserMappings();
+    renderPermissionMigration();
+  } catch (error) {
+    showMappingError(error);
+  }
+}
+
+function invalidateMigrationPlan() {
+  state.migrationPlan = null;
+  byId("migration-confirm").checked = false;
+  renderPermissionMigration();
+}
+
+async function syncDirectoryUsers() {
+  const tenantId = byId("mapping-tenant").value;
+  if (!tenantId) return;
+  state.mappingBusy = true;
+  invalidateMigrationPlan();
+  renderUserMappings();
+  try {
+    await api(`/tenants/${encodeURIComponent(tenantId)}/directory-users/sync`, { method: "POST" });
+    await loadUserMappings();
+  } catch (error) {
+    showMappingError(error);
+  } finally {
+    state.mappingBusy = false;
+    renderUserMappings();
+  }
+}
+
+function showMappingError(error) {
+  byId("mapping-error").textContent = error.message;
+  byId("mapping-error").classList.remove("hidden");
+}
+
+function renderUserMappings() {
+  if (!byId("mapping-body")) return;
+  const data = state.userMappings;
+  const hasUsers = Boolean(data?.sourceUsers.length);
+  const mappedCount = data?.sourceUsers.filter((user) => user.targetUserId).length || 0;
+  byId("mapping-table").classList.toggle("hidden", !hasUsers);
+  byId("mapping-empty").classList.toggle("hidden", hasUsers);
+  byId("mapping-empty").textContent = data?.directoryUserCount
+    ? t("Ingen tenant-brugere med Fabric-adgang blev fundet.")
+    : t("Vælg en tenant og hent tenant-brugerne.");
+  byId("mapping-summary").textContent = data ? t("{sources} Fabric-brugere · {targets} mulige mål · {mapped} mappet", {
+    sources: data.sourceUsers.length.toLocaleString(localeName()),
+    targets: data.targetUsers.length.toLocaleString(localeName()),
+    mapped: mappedCount.toLocaleString(localeName())
+  }) : "";
+  byId("mapping-sync").disabled = state.mappingBusy || !byId("mapping-tenant").value;
+  byId("mapping-sync").textContent = t(state.mappingBusy ? "Henter brugere..." : "Hent tenant-brugere");
+  if (!hasUsers) { byId("mapping-body").innerHTML = ""; return; }
+  byId("mapping-body").innerHTML = data.sourceUsers.map((source) => `
+    <tr><td class="person-cell"><strong>${escapeHtml(source.displayName)}</strong><span>${escapeHtml(source.userPrincipalName || source.mail)}</span></td>
+    <td><select class="mapping-select" data-source-user-id="${escapeHtml(source.id)}" ${state.mappingBusy ? "disabled" : ""}>
+      <option value="">${t("Vælg ny bruger")}</option>
+      ${data.targetUsers.map((target) => `<option value="${escapeHtml(target.id)}" ${target.id === source.targetUserId ? "selected" : ""} ${target.mappedSourceUserId && target.mappedSourceUserId !== source.id ? "disabled" : ""}>${escapeHtml(target.displayName)} · ${escapeHtml(target.userPrincipalName || target.mail)}</option>`).join("")}
+    </select></td><td><span class="status-chip" data-status="${source.targetUserId ? "completed" : "idle"}">${t(source.targetUserId ? "Mappet" : "Ikke mappet")}</span></td></tr>
+  `).join("");
+  document.querySelectorAll(".mapping-select").forEach((select) => select.addEventListener("change", saveUserMapping));
+}
+
+async function saveUserMapping(event) {
+  const tenantId = byId("mapping-tenant").value;
+  const sourceUserId = event.target.dataset.sourceUserId;
+  const targetUserId = event.target.value;
+  state.mappingBusy = true;
+  renderUserMappings();
+  try {
+    state.userMappings = await api(`/tenants/${encodeURIComponent(tenantId)}/user-mappings/${encodeURIComponent(sourceUserId)}`, targetUserId
+      ? { method: "PUT", body: { targetUserId } }
+      : { method: "DELETE" });
+    invalidateMigrationPlan();
+    byId("mapping-error").classList.add("hidden");
+  } catch (error) {
+    showMappingError(error);
+  } finally {
+    state.mappingBusy = false;
+    renderUserMappings();
+  }
+}
+
+async function loadPermissionMigrationPlan() {
+  const tenantId = byId("mapping-tenant").value;
+  if (!tenantId) return;
+  state.migrationPlanLoading = true;
+  renderPermissionMigration();
+  try {
+    state.migrationPlan = await api(`/tenants/${encodeURIComponent(tenantId)}/permission-migration/plan`);
+    state.migrationPlanDetail = state.migrationPlan.counts.unsupported ? "unsupported" : "coveredByWorkspaceRoles";
+    byId("migration-confirm").checked = false;
+    byId("migration-error").classList.add("hidden");
+  } catch (error) {
+    showMigrationError(error);
+  } finally {
+    state.migrationPlanLoading = false;
+    renderPermissionMigration();
+    if (state.migrationPlan) {
+      byId("migration-plan").scrollIntoView({ behavior: "smooth", block: "nearest" });
+      byId("migration-confirm").focus({ preventScroll: true });
+    }
+  }
+}
+
+function showMigrationError(error) {
+  byId("migration-error").textContent = error.message;
+  byId("migration-error").classList.remove("hidden");
+}
+
+function renderMigrationPlanDetails(plan) {
+  const categories = {
+    workspaceRoles: {
+      title: "Workspace-roller",
+      summary: "{count} workspace-roller anvendes",
+      items: plan?.operations.filter((item) => item.kind === "workspaceRole") || []
+    },
+    datasetRights: {
+      title: "Semantic model-rettigheder",
+      summary: "{count} semantic model-rettigheder anvendes",
+      items: plan?.operations.filter((item) => item.kind === "datasetRight") || []
+    },
+    coveredByWorkspaceRoles: {
+      title: "Dækket af workspace-rolle",
+      summary: "{count} rettigheder dækkes af workspace-roller",
+      items: plan?.coveredByWorkspaceRole || []
+    },
+    unsupported: {
+      title: "Ikke-understøttede rettigheder",
+      summary: "{count} rettigheder kan ikke kopieres præcist",
+      items: plan?.unsupported || []
+    }
+  };
+  const selected = categories[state.migrationPlanDetail] || categories.unsupported;
+  document.querySelectorAll("[data-migration-detail]").forEach((button) => {
+    const active = button.dataset.migrationDetail === state.migrationPlanDetail;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", active);
+  });
+  byId("migration-detail-list").classList.toggle("hidden", !plan);
+  byId("migration-detail-title").textContent = t(selected.title);
+  byId("migration-detail-summary").textContent = t(selected.summary, { count: selected.items.length.toLocaleString(localeName()) });
+  byId("migration-detail-body").innerHTML = selected.items.map((item) => {
+    const detail = item.reason
+      ? t(item.reason)
+      : item.workspaceRole
+        ? t("Dækket af workspace-rollen {role}", { role: item.workspaceRole })
+        : t("Anvendes præcist");
+    return `<tr>
+      <td>${escapeHtml(item.sourceUserName)}</td>
+      <td>${escapeHtml(item.targetUserName)}</td>
+      <td>${escapeHtml(item.workspaceName)}</td>
+      <td>${escapeHtml(item.artifactName || "–")}</td>
+      <td><span class="badge">${escapeHtml(item.artifactType || "Workspace")}</span></td>
+      <td><span class="badge access-badge">${escapeHtml(item.right)}</span></td>
+      <td class="migration-detail-description">${escapeHtml(detail)}</td>
+    </tr>`;
+  }).join("");
+}
+
+function renderPermissionMigration() {
+  if (!byId("migration-stage")) return;
+  const plan = state.migrationPlan;
+  const job = state.migrationJob || { status: "idle", progress: 0, stage: "Ready to apply mapped permissions", logs: [], failures: [] };
+  const active = ["queued", "running", "cancelling"].includes(job.status);
+  const tenantSelected = Boolean(byId("mapping-tenant").value);
+  const mappedCount = state.userMappings?.sourceUsers.filter((user) => user.targetUserId).length || 0;
+  byId("migration-plan-load").disabled = active || state.migrationPlanLoading || !tenantSelected || mappedCount === 0;
+  byId("migration-plan-load").textContent = t(state.migrationPlanLoading ? "Indlæser plan..." : "Gennemgå plan");
+  byId("migration-plan").classList.toggle("hidden", !plan);
+  byId("migration-workspace-count").textContent = (plan?.counts.workspaceRoles || 0).toLocaleString(localeName());
+  byId("migration-dataset-count").textContent = (plan?.counts.datasetRights || 0).toLocaleString(localeName());
+  byId("migration-covered-count").textContent = (plan?.counts.coveredByWorkspaceRoles || 0).toLocaleString(localeName());
+  byId("migration-unsupported-count").textContent = (plan?.counts.unsupported || 0).toLocaleString(localeName());
+  renderMigrationPlanDetails(plan);
+  byId("migration-confirm").disabled = active;
+  byId("migration-start").disabled = active || !plan?.counts.total || !byId("migration-confirm").checked;
+  byId("migration-stage").textContent = t(job.stage);
+  byId("migration-percent").textContent = `${job.progress || 0}%`;
+  byId("migration-progress-bar").style.width = `${job.progress || 0}%`;
+  byId("migration-progress-bar").parentElement.setAttribute("aria-valuenow", job.progress || 0);
+  byId("migration-current").textContent = job.total
+    ? t("Rettighed {current}/{total}", { current: (job.current || 0).toLocaleString(localeName()), total: job.total.toLocaleString(localeName()) })
+    : t("Ikke startet");
+  byId("migration-cancel").classList.toggle("hidden", !active);
+  byId("migration-wait").classList.toggle("hidden", !job.wait);
+  if (job.wait) {
+    byId("migration-wait-title").textContent = t("Venter {seconds} sek. før næste API-kald", { seconds: Math.ceil(job.wait.seconds).toLocaleString(localeName()) });
+    byId("migration-wait-detail").textContent = `${t(job.wait.reason === "retry" ? "Midlertidig API-fejl" : "Throttle-beskyttelse")} · ${t("Forventet fortsættelse kl. {time}", { time: formatTime(job.wait.nextCallAtUtc) })}`;
+  }
+  byId("migration-result").classList.toggle("hidden", !job.result);
+  byId("migration-result").innerHTML = job.result ? Object.entries(job.result).map(([key, value]) => `<div><strong>${value.toLocaleString(localeName())}</strong><span>${escapeHtml(t(key))}</span></div>`).join("") : "";
+  byId("migration-failures").classList.toggle("hidden", !job.failures?.length);
+  byId("migration-failures").innerHTML = job.failures?.length ? `<strong>${t("Fejl under migration")}</strong>${job.failures.slice(0, 20).map((failure) => `<span>${escapeHtml(failure.targetUserName)} · ${escapeHtml(failure.workspaceName)}${failure.artifactName ? ` · ${escapeHtml(failure.artifactName)}` : ""}: ${escapeHtml(failure.error)}</span>`).join("")}` : "";
+  byId("migration-log").textContent = job.logs?.length ? job.logs.join("\n") : t("Ingen aktivitet endnu.");
+}
+
+async function pollPermissionMigration() {
+  clearTimeout(state.migrationTimer);
+  try {
+    state.migrationJob = await api("/permission-migrations/current");
+    renderPermissionMigration();
+    if (["queued", "running", "cancelling"].includes(state.migrationJob.status)) state.migrationTimer = setTimeout(pollPermissionMigration, 1000);
+  } catch (error) {
+    showMigrationError(error);
+  }
+}
+
+async function startPermissionMigration() {
+  const tenantId = byId("mapping-tenant").value;
+  try {
+    state.migrationJob = await api(`/tenants/${encodeURIComponent(tenantId)}/permission-migration`, { method: "POST", body: { confirmed: true } });
+    byId("migration-error").classList.add("hidden");
+    renderPermissionMigration();
+    state.migrationTimer = setTimeout(pollPermissionMigration, 300);
+  } catch (error) {
+    showMigrationError(error);
+  }
+}
+
+async function cancelPermissionMigration() {
+  try {
+    state.migrationJob = await api("/permission-migrations/current", { method: "DELETE" });
+    renderPermissionMigration();
+  } catch (error) {
+    showMigrationError(error);
+  }
+}
+
 async function openWorkspace(workspaceId) {
   const detail = await api(`/workspaces/${encodeURIComponent(workspaceId)}`);
   byId("dialog-title").textContent = detail.workspace.name;
@@ -428,10 +713,17 @@ function renderAuth() {
   tenantSelect.disabled = !authenticated || !auth.tenants?.length;
   if (auth.tenants?.some((tenant) => tenant.id === selectedTenant)) tenantSelect.value = selectedTenant;
   if (!tenantSelect.value && auth.tenants?.length === 1) tenantSelect.value = auth.tenants[0].id;
+  const mappingTenant = byId("mapping-tenant");
+  const selectedMappingTenant = mappingTenant.value;
+  mappingTenant.innerHTML = tenantSelect.innerHTML;
+  mappingTenant.disabled = tenantSelect.disabled;
+  if (auth.tenants?.some((tenant) => tenant.id === selectedMappingTenant)) mappingTenant.value = selectedMappingTenant;
+  if (!mappingTenant.value && auth.tenants?.length === 1) mappingTenant.value = auth.tenants[0].id;
   byId("auth-login").disabled = waiting || auth.status === "unavailable";
   byId("auth-login").textContent = t(waiting ? "Afventer Microsoft..." : auth.status === "unavailable" ? "Kræver container-rebuild" : authenticated ? "Skift konto" : "Log ind med Microsoft");
   byId("auth-logout").classList.toggle("hidden", !authenticated);
   renderScan();
+  renderUserMappings();
 }
 
 async function pollAuth() {
@@ -525,7 +817,7 @@ function exportPage() {
 }
 
 function switchView(view) {
-  const titles = { overview: "Adgangsoverblik", permissions: "Rettigheder", workspaces: "Workspaces", coverage: "API-dækning", scan: "Start discovery-scan" };
+  const titles = { overview: "Adgangsoverblik", permissions: "Rettigheder", workspaces: "Workspaces", mappings: "Brugermapping for migration", coverage: "API-dækning", scan: "Start discovery-scan" };
   state.activeView = view;
   document.querySelectorAll(".nav-item").forEach((item) => item.classList.toggle("active", item.dataset.view === view));
   document.querySelectorAll(".view").forEach((item) => item.classList.toggle("active-view", item.id === `${view}-view`));
@@ -556,6 +848,17 @@ function bindEvents() {
   byId("scan-artifacts").addEventListener("change", renderScanEstimate);
   byId("scan-personal").addEventListener("change", renderScanEstimate);
   byId("scan-form").addEventListener("submit", startScan);
+  byId("mapping-tenant").addEventListener("change", () => { invalidateMigrationPlan(); loadUserMappings(); });
+  byId("mapping-sync").addEventListener("click", syncDirectoryUsers);
+  byId("migration-plan-load").addEventListener("click", loadPermissionMigrationPlan);
+  document.querySelectorAll("[data-migration-detail]").forEach((button) => button.addEventListener("click", () => {
+    state.migrationPlanDetail = button.dataset.migrationDetail;
+    renderPermissionMigration();
+    byId("migration-detail-list").scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }));
+  byId("migration-confirm").addEventListener("change", renderPermissionMigration);
+  byId("migration-start").addEventListener("click", startPermissionMigration);
+  byId("migration-cancel").addEventListener("click", cancelPermissionMigration);
   document.querySelectorAll("[data-layout]").forEach((button) => button.addEventListener("click", () => {
     document.querySelectorAll("[data-layout]").forEach((item) => item.classList.toggle("active", item === button));
     byId("workspace-grid").classList.toggle("list-layout", button.dataset.layout === "list");
@@ -569,7 +872,7 @@ async function init() {
     [state.summary, state.facets, state.coverage] = await Promise.all([api("/summary"), api("/facets"), api("/coverage")]);
     byId("snapshot-date").textContent = formatDate(state.summary.generatedAtUtc, true);
     renderOverview(); renderFilters(); renderCoverage(); bindEvents();
-    await Promise.all([loadPermissions(), loadWorkspaces(), pollAuth(), pollScan()]);
+    await Promise.all([loadPermissions(), loadWorkspaces(), pollAuth(), pollScan(), pollPermissionMigration()]);
     byId("loading").classList.add("hidden"); byId("app-content").classList.remove("hidden");
   } catch (error) {
     byId("loading").classList.add("hidden"); byId("error-state").classList.remove("hidden"); byId("error-message").textContent = error.message;

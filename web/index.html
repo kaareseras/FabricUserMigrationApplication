@@ -26,6 +26,7 @@
         <button class="nav-item active" data-view="overview"><span class="nav-icon">⌂</span>Overblik</button>
         <button class="nav-item" data-view="permissions"><span class="nav-icon">≡</span>Rettigheder</button>
         <button class="nav-item" data-view="workspaces"><span class="nav-icon">▦</span>Workspaces</button>
+        <button class="nav-item" data-view="mappings"><span class="nav-icon">⇄</span>Brugermapping</button>
         <button class="nav-item" data-view="coverage"><span class="nav-icon">✓</span>API-dækning</button>
         <button class="nav-item" data-view="scan"><span class="nav-icon">↻</span>Start scan</button>
       </nav>
@@ -121,6 +122,66 @@
           </div>
           <div id="workspace-grid" class="workspace-grid"></div>
           <div id="workspaces-pagination" class="pagination"></div>
+        </section>
+
+        <section id="mappings-view" class="view">
+          <div class="mapping-intro">
+            <div><p class="eyebrow">MIGRATION</p><h2>Map nuværende brugere til nye brugere</h2><p>Listen viser tenant-brugere med Fabric-adgang. Hver kan kun mappes til én tenant-bruger uden Fabric-adgang, og samme målbruger kan ikke genbruges.</p></div>
+          </div>
+          <div class="mapping-toolbar">
+            <label><span>Tenant</span><select id="mapping-tenant" disabled><option value="">Log ind for at hente tenants</option></select></label>
+            <button id="mapping-sync" class="secondary-button" type="button" disabled>Hent tenant-brugere</button>
+            <span id="mapping-summary" class="mapping-summary"></span>
+          </div>
+          <p id="mapping-error" class="form-error hidden"></p>
+          <div id="mapping-table" class="table-wrap hidden">
+            <table class="mapping-table">
+              <thead><tr><th>Nuværende Fabric-bruger</th><th>Ny bruger uden Fabric-adgang</th><th>Status</th></tr></thead>
+              <tbody id="mapping-body"></tbody>
+            </table>
+          </div>
+          <div id="mapping-empty" class="empty-state">Vælg en tenant og hent tenant-brugerne.</div>
+
+          <section class="migration-runner" aria-live="polite">
+            <div class="migration-runner-heading">
+              <div><p class="eyebrow">PERMISSION MIGRATION</p><h2>Anvend de mappede rettigheder</h2><p>Rettigheder tilføjes til de nye brugere. De oprindelige brugeres rettigheder ændres ikke.</p></div>
+              <button id="migration-plan-load" class="secondary-button" type="button" disabled>Gennemgå plan</button>
+            </div>
+            <p id="migration-error" class="form-error hidden"></p>
+            <div id="migration-plan" class="migration-plan hidden">
+              <div class="migration-plan-counts">
+                <button type="button" data-migration-detail="workspaceRoles" aria-controls="migration-detail-list"><span>Workspace-roller</span><strong id="migration-workspace-count">0</strong></button>
+                <button type="button" data-migration-detail="datasetRights" aria-controls="migration-detail-list"><span>Semantic model-rettigheder</span><strong id="migration-dataset-count">0</strong></button>
+                <button type="button" data-migration-detail="coveredByWorkspaceRoles" aria-controls="migration-detail-list"><span>Dækket af workspace-rolle</span><strong id="migration-covered-count">0</strong></button>
+                <button type="button" data-migration-detail="unsupported" aria-controls="migration-detail-list"><span>Kan ikke kopieres præcist</span><strong id="migration-unsupported-count">0</strong></button>
+              </div>
+              <p>Kun rettigheder, som Microsofts API'er kan kopiere præcist, bliver anvendt. Ikke-understøttede rettigheder registreres i resultatrapporten.</p>
+              <section id="migration-detail-list" class="migration-detail-list hidden">
+                <div class="migration-list-heading"><strong id="migration-detail-title"></strong><span id="migration-detail-summary"></span></div>
+                <div class="table-wrap migration-detail-table-wrap">
+                  <table class="migration-detail-table">
+                    <thead><tr><th>Kildebruger</th><th>Målbruger</th><th>Workspace</th><th>Item</th><th>Type</th><th>Adgang</th><th>Detalje</th></tr></thead>
+                    <tbody id="migration-detail-body"></tbody>
+                  </table>
+                </div>
+              </section>
+              <label class="check-row"><input id="migration-confirm" type="checkbox"><span><strong>Jeg har gennemgået planen</strong><small>Dette starter en skriveoperation mod den valgte tenant.</small></span></label>
+              <button id="migration-start" class="primary-button" type="button" disabled>Anvend rettigheder</button>
+            </div>
+            <div class="migration-progress">
+              <div class="scan-status-heading"><div><p class="eyebrow">LIVE STATUS</p><h2 id="migration-stage">Klar til rettighedsmigration</h2></div><strong id="migration-percent">0%</strong></div>
+              <div class="progress-track" role="progressbar" aria-label="Rettighedsmigration" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="migration-progress-bar" class="progress-fill"></div></div>
+              <div class="scan-meta"><span id="migration-current">Ikke startet</span><button id="migration-cancel" class="text-button hidden" type="button">Annuller job</button></div>
+              <div id="migration-wait" class="scan-wait hidden" role="status">
+                <span class="scan-wait-icon" aria-hidden="true">◷</span>
+                <div><strong id="migration-wait-title"></strong><span id="migration-wait-detail"></span></div>
+              </div>
+              <div id="migration-result" class="scan-result hidden"></div>
+              <div id="migration-failures" class="migration-failures hidden"></div>
+              <div class="log-heading"><strong>Proceslog</strong><span>Seneste 200 linjer</span></div>
+              <pre id="migration-log" class="scan-log">Ingen aktivitet endnu.</pre>
+            </div>
+          </section>
         </section>
 
         <section id="coverage-view" class="view">
