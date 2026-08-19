@@ -1,0 +1,16 @@
+services:
+  app:
+    build:
+      context: .
+      target: runtime
+    ports:
+      - "8080:8080"
+    environment:
+      FORCE_SNAPSHOT_IMPORT: ${FORCE_SNAPSHOT_IMPORT:-false}
+    volumes:
+      - ./artifacts/fabric-permission-discovery:/app/artifacts/fabric-permission-discovery:ro
+      - fabric-data:/app/data
+    restart: unless-stopped
+
+volumes:
+  fabric-data:

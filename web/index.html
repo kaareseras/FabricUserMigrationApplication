@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="da">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fabric Access Atlas</title>
+  <script>
+    (() => {
+      const param = new URLSearchParams(window.location.search).get("clawpilotTheme");
+      const theme =
+        param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+        <div><strong>Access Atlas</strong><small>Microsoft Fabric</small></div>
+      </div>
+
+      <nav class="nav" aria-label="Primær navigation">
+        <button class="nav-item active" data-view="overview"><span class="nav-icon">⌂</span>Overblik</button>
+        <button class="nav-item" data-view="permissions"><span class="nav-icon">≡</span>Rettigheder</button>
+        <button class="nav-item" data-view="workspaces"><span class="nav-icon">▦</span>Workspaces</button>
+        <button class="nav-item" data-view="coverage"><span class="nav-icon">✓</span>API-dækning</button>
+        <button class="nav-item" data-view="scan"><span class="nav-icon">↻</span>Start scan</button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="read-only"><span></span>Read-only discovery</div>
+        <button id="theme-toggle" class="icon-button" title="Skift tema" aria-label="Skift tema">◐</button>
+      </div>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <button id="menu-toggle" class="icon-button menu-toggle" aria-label="Åbn menu">☰</button>
+        <div>
+          <p class="eyebrow">TENANT A · DISCOVERY</p>
+          <h1 id="page-title">Adgangsoverblik</h1>
+        </div>
+        <div class="snapshot">
+          <span>Snapshot</span>
+          <strong id="snapshot-date">Indlæser...</strong>
+        </div>
+      </header>
+
+      <div id="loading" class="loading-state">
+        <div class="loader"></div>
+        <strong>Indlæser Fabric-rettigheder</strong>
+        <span>Normaliserer workspaces, items og principals</span>
+      </div>
+
+      <div id="error-state" class="error-state hidden">
+        <strong>Data kunne ikke indlæses</strong>
+        <p id="error-message"></p>
+        <p>Start siden via den lokale webserver, så JSON-filerne kan læses.</p>
+      </div>
+
+      <div id="app-content" class="hidden">
+        <section id="overview-view" class="view active-view">
+          <div class="metric-grid">
+            <article class="metric"><span>Workspaces</span><strong id="metric-workspaces">0</strong><small>aktive i snapshot</small></article>
+            <article class="metric"><span>Fabric-items</span><strong id="metric-artifacts">0</strong><small id="metric-types">0 item-typer</small></article>
+            <article class="metric"><span>Principals</span><strong id="metric-principals">0</strong><small>unikke identiteter</small></article>
+            <article class="metric"><span>Tildelinger</span><strong id="metric-assignments">0</strong><small>workspace + item</small></article>
+          </div>
+
+          <div class="overview-grid">
+            <section class="panel access-panel">
+              <div class="panel-heading"><div><p class="eyebrow">FORDELING</p><h2>Adgang pr. principal</h2></div><span class="panel-note">Item-tildelinger</span></div>
+              <div id="principal-bars" class="bar-list"></div>
+            </section>
+            <section class="panel">
+              <div class="panel-heading"><div><p class="eyebrow">ITEM LANDSCAPE</p><h2>Største kategorier</h2></div></div>
+              <div id="type-list" class="type-list"></div>
+            </section>
+          </div>
+
+          <section class="panel recent-panel">
+            <div class="panel-heading"><div><p class="eyebrow">SENEST ÆNDRET</p><h2>Fabric-items</h2></div><button class="text-button" data-go="permissions">Se alle rettigheder →</button></div>
+            <div id="recent-items" class="recent-list"></div>
+          </section>
+        </section>
+
+        <section id="permissions-view" class="view">
+          <div class="toolbar">
+            <label class="search-field"><span>⌕</span><input id="permission-search" type="search" placeholder="Søg item, workspace eller bruger..."></label>
+            <select id="workspace-filter" aria-label="Filtrer workspace"><option value="">Alle workspaces</option></select>
+            <select id="type-filter" aria-label="Filtrer item-type"><option value="">Alle item-typer</option></select>
+            <select id="access-filter" aria-label="Filtrer adgang"><option value="">Alle adgangstyper</option></select>
+            <button id="export-csv" class="secondary-button">Eksportér side</button>
+          </div>
+          <div class="results-summary"><strong id="permission-count">0</strong><span>rettighedstildelinger</span></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Principal</th><th>Workspace</th><th>Item</th><th>Type</th><th>Adgang</th><th>Status</th></tr></thead>
+              <tbody id="permissions-body"></tbody>
+            </table>
+          </div>
+          <div id="permissions-empty" class="empty-state hidden">Ingen rettigheder matcher filtrene.</div>
+          <div id="permissions-pagination" class="pagination"></div>
+        </section>
+
+        <section id="workspaces-view" class="view">
+          <div class="toolbar compact-toolbar">
+            <label class="search-field"><span>⌕</span><input id="workspace-search" type="search" placeholder="Søg workspace..."></label>
+            <div class="view-switch" role="group" aria-label="Visning"><button class="active" data-layout="grid">▦</button><button data-layout="list">≡</button></div>
+          </div>
+          <div id="workspace-grid" class="workspace-grid"></div>
+          <div id="workspaces-pagination" class="pagination"></div>
+        </section>
+
+        <section id="coverage-view" class="view">
+          <div class="coverage-intro">
+            <div><p class="eyebrow">DISCOVERY STATUS</p><h2>Hvad kan API’erne se?</h2><p>Snapshot’et kombinerer Fabric Admin API og Power BI metadata scanning. Det er et stærkt udgangspunkt, men ikke hele den effektive sikkerhedsmodel.</p></div>
+            <div class="coverage-score"><strong id="coverage-score">0</strong><span>datakilder valideret</span></div>
+          </div>
+          <div class="coverage-grid">
+            <section class="coverage-column covered"><div class="coverage-title"><span>✓</span><div><h3>Dækket nu</h3><p>Indgår i dette snapshot</p></div></div><ul id="covered-list"></ul></section>
+            <section class="coverage-column missing"><div class="coverage-title"><span>!</span><div><h3>Kræver collector</h3><p>Separate sikkerhedsmodeller</p></div></div><ul id="not-covered-list"></ul></section>
+          </div>
+          <section class="panel api-notes"><div class="panel-heading"><div><p class="eyebrow">DRIFTSNOTER</p><h2>API-begrænsninger</h2></div></div><ul id="api-notes-list"></ul></section>
+        </section>
+
+        <section id="scan-view" class="view">
+          <div class="scan-layout">
+            <form id="scan-form" class="panel scan-form">
+              <div class="panel-heading"><div><p class="eyebrow">TENANT DISCOVERY</p><h2>Nyt rettighedsscan</h2></div><span id="scan-availability" class="status-chip">Klar</span></div>
+              <label class="field-label" for="scan-tenant">Tenant ID</label>
+              <input id="scan-tenant" class="text-input" name="tenantId" required minlength="3" maxlength="100" pattern="[0-9a-fA-F-]+" autocomplete="off" placeholder="00000000-0000-0000-0000-000000000000">
+              <label class="field-label" for="scan-limit">Maks. antal workspaces</label>
+              <input id="scan-limit" class="text-input" name="workspaceLimit" type="number" min="0" max="100000" value="0">
+              <span class="field-hint">0 scanner alle aktive workspaces.</span>
+              <label class="check-row"><input id="scan-artifacts" type="checkbox" checked><span><strong>Power BI artifact-brugere</strong><small>Medtag item-adgang fra metadata-scanneren</small></span></label>
+              <label class="check-row"><input id="scan-personal" type="checkbox"><span><strong>Personlige workspaces</strong><small>Medtag My Workspaces i discovery</small></span></label>
+              <button id="scan-start" class="primary-button" type="submit">Start scan</button>
+              <p id="scan-form-error" class="form-error hidden"></p>
+            </form>
+
+            <section class="panel scan-progress-panel" aria-live="polite">
+              <div class="scan-status-heading"><div><p class="eyebrow">LIVE STATUS</p><h2 id="scan-stage">Klar til scanning</h2></div><strong id="scan-percent">0%</strong></div>
+              <div class="progress-track" role="progressbar" aria-label="Scan-fremdrift" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="scan-progress" class="progress-fill"></div></div>
+              <div class="scan-meta"><span id="scan-started">Ikke startet</span><span id="scan-completed"></span></div>
+              <div id="scan-result" class="scan-result hidden"></div>
+              <div class="log-heading"><strong>Proceslog</strong><span>Seneste 200 linjer</span></div>
+              <pre id="scan-log" class="scan-log">Ingen aktivitet endnu.</pre>
+            </section>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <dialog id="workspace-dialog">
+    <div class="dialog-header"><div><p class="eyebrow">WORKSPACE DETALJER</p><h2 id="dialog-title"></h2></div><button id="dialog-close" class="icon-button" aria-label="Luk">×</button></div>
+    <div id="dialog-content"></div>
+  </dialog>
+
+  <script src="/assets/app.js"></script>
+</body>
+</html>
