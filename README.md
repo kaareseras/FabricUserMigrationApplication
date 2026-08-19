@@ -12,6 +12,8 @@ From the repository root, run:
 docker compose up --build -d
 ```
 
+For anything beyond local use, set `FABRIC_ATLAS_TOKEN` in `.env` first (see [Security](#security)).
+
 Open [http://localhost:8080](http://localhost:8080), select **Start scan**, and then:
 
 1. Select **Sign in with Microsoft**, open the Microsoft link shown by the dashboard, and enter the displayed one-time code.
@@ -61,6 +63,31 @@ Then start it normally again so future restarts do not force another import:
 
 ```bash
 docker compose up -d
+```
+
+## Security
+
+The dashboard binds to localhost only; Docker Compose maps the port as `127.0.0.1:8080:8080`. To reach it from another machine, use an SSH tunnel or a reverse proxy that adds its own authentication — do not expose the container port directly.
+
+To protect the mutating endpoints (sign-in, scans, user mapping, permission migration), set `FABRIC_ATLAS_TOKEN` in `.env`:
+
+```bash
+cp .env.example .env
+# Set FABRIC_ATLAS_TOKEN to a long random value, for example: openssl rand -hex 32
+docker compose up --build -d
+```
+
+With the token configured, every mutating endpoint requires `Authorization: Bearer <token>` (compared in constant time). Read-only endpoints stay open so the dashboard remains usable as a viewer. The scan view has an **API token** field that stores the value in browser localStorage and attaches it to all requests; clear the field and save again to remove it.
+
+When `FABRIC_ATLAS_TOKEN` is empty, the API runs unauthenticated and logs a warning at startup — suitable only for local development on 127.0.0.1.
+
+Example of an authenticated mutating call:
+
+```bash
+curl -X POST http://127.0.0.1:8080/api/scans \
+  -H "Authorization: Bearer $FABRIC_ATLAS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"tenantId": "<tenant-id>", "workspaceLimit": 5}'
 ```
 
 ## Authentication and permissions

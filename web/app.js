@@ -1,5 +1,6 @@
 const API_ROOT = "/api";
 const LANGUAGE_STORAGE_KEY = "fabric-access-atlas-language";
+const TOKEN_STORAGE_KEY = "fabric-access-atlas-token";
 const LOCALES = { da: "da-DK", en: "en-US", pt: "pt-PT" };
 const translations = {
   da: {
@@ -136,6 +137,20 @@ Object.assign(translations.pt, {
   "The available Microsoft write APIs cannot reproduce this item type and access right exactly.": "As APIs de escrita disponíveis da Microsoft não conseguem reproduzir exatamente este tipo de item e direito de acesso.",
   "This workspace role is not supported by the Fabric role-assignment API.": "Esta função do espaço de trabalho não é suportada pela API de atribuição de funções do Fabric."
 });
+Object.assign(translations.en, {
+  "API-token": "API token",
+  "Indtast token (FABRIC_ATLAS_TOKEN)": "Enter the token from FABRIC_ATLAS_TOKEN",
+  "Gem": "Save",
+  "Gemmes kun i denne browser og bruges, når serveren kræver et token.": "Stored only in this browser; used when the server requires a token.",
+  "API-token mangler eller er ugyldig": "Missing or invalid API token"
+});
+Object.assign(translations.pt, {
+  "API-token": "Token da API",
+  "Indtast token (FABRIC_ATLAS_TOKEN)": "Insira o token de FABRIC_ATLAS_TOKEN",
+  "Gem": "Guardar",
+  "Gemmes kun i denne browser og bruges, når serveren kræver et token.": "Guardado apenas neste navegador; usado quando o servidor exige um token.",
+  "API-token mangler eller er ugyldig": "Token da API em falta ou inválido"
+});
 
 function detectLanguage() {
   const stored = localStorage.getItem(LANGUAGE_STORAGE_KEY);
@@ -218,17 +233,26 @@ function setLanguage(language, persist = true) {
 }
 
 async function api(path, options = {}) {
+  const headers = options.body ? { "Content-Type": "application/json" } : {};
+  const token = localStorage.getItem(TOKEN_STORAGE_KEY);
+  if (token) headers.Authorization = `Bearer ${token}`;
   const response = await fetch(`${API_ROOT}${path}`, {
     method: options.method || "GET",
-    headers: options.body ? { "Content-Type": "application/json" } : undefined,
+    headers,
     body: options.body ? JSON.stringify(options.body) : undefined,
     signal: options.signal
   });
   if (!response.ok) {
     const detail = await response.json().catch(() => ({}));
-    throw new Error(detail.detail || `${path}: HTTP ${response.status}`);
+    throw new Error(response.status === 401 ? t("API-token mangler eller er ugyldig") : (detail.detail || `${path}: HTTP ${response.status}`));
   }
   return response.json();
+}
+
+function saveApiToken() {
+  const value = byId("api-token").value.trim();
+  if (value) localStorage.setItem(TOKEN_STORAGE_KEY, value);
+  else localStorage.removeItem(TOKEN_STORAGE_KEY);
 }
 
 function formatDate(value, withTime = false) {
@@ -843,6 +867,12 @@ function bindEvents() {
   byId("theme-toggle").addEventListener("click", () => document.documentElement.setAttribute("data-theme", document.documentElement.dataset.theme === "dark" ? "light" : "dark"));
   byId("auth-login").addEventListener("click", startLogin);
   byId("auth-logout").addEventListener("click", logout);
+  byId("api-token-save").addEventListener("click", saveApiToken);
+  byId("api-token").addEventListener("keydown", (event) => {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    saveApiToken();
+  });
   byId("scan-tenant").addEventListener("change", renderScan);
   byId("scan-limit").addEventListener("input", renderScanEstimate);
   byId("scan-artifacts").addEventListener("change", renderScanEstimate);

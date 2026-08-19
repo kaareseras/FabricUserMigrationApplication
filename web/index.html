@@ -212,6 +212,14 @@
                   <button id="auth-login" class="secondary-button" type="button">Log ind med Microsoft</button>
                   <button id="auth-logout" class="secondary-button hidden" type="button">Log ud</button>
                 </div>
+                <div class="auth-token">
+                  <label class="field-label" for="api-token">API-token</label>
+                  <div class="auth-token-row">
+                    <input id="api-token" class="text-input" type="password" autocomplete="off" placeholder="Indtast token (FABRIC_ATLAS_TOKEN)">
+                    <button id="api-token-save" class="secondary-button" type="button">Gem</button>
+                  </div>
+                  <span class="field-hint">Gemmes kun i denne browser og bruges, når serveren kræver et token.</span>
+                </div>
                 <p id="auth-error" class="form-error hidden"></p>
               </section>
               <label class="field-label" for="scan-tenant">Tenant</label>

@@ -3,11 +3,16 @@ services:
     build:
       context: .
       target: runtime
+    # Bind to localhost only; reach the dashboard from other machines through an
+    # SSH tunnel or a reverse proxy that adds its own authentication.
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8080:8080"
     environment:
       FORCE_SNAPSHOT_IMPORT: ${FORCE_SNAPSHOT_IMPORT:-false}
       AZURE_LOGIN_USE_DEVICE_CODE: "true"
+      # Shared secret for mutating endpoints (scans, mappings, permission migrations).
+      # Set it in .env; when empty the API runs unauthenticated with a startup warning.
+      FABRIC_ATLAS_TOKEN: ${FABRIC_ATLAS_TOKEN:-}
     volumes:
       - fabric-artifacts:/app/artifacts/fabric-permission-discovery
       - fabric-data:/app/data

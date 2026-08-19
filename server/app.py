@@ -1,8 +1,10 @@
 import json
+import logging
 import math
 import re
 import sqlite3
 from collections.abc import Generator
+from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Annotated, Any
 
@@ -15,11 +17,24 @@ from .azure_auth import azure_auth_manager
 from .database import DEFAULT_DATABASE, ROOT, connect
 from .permission_migration import ACTIVE_STATUSES, build_permission_plan, permission_migration_manager
 from .scan_jobs import scan_manager
+from .security import configured_token, require_api_token
 from .user_mappings import delete_user_mapping, mapping_view, set_user_mapping, sync_directory_users
 
 
 WEB_ROOT = ROOT / "web"
-app = FastAPI(title="Fabric Access Atlas API", version="1.0.0")
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI) -> Generator[None, None, None]:
+    if configured_token() is None:
+        logging.getLogger("fabric-access-atlas").warning(
+            "%s is not set; mutating API endpoints are unauthenticated. Set it before exposing the app beyond 127.0.0.1.",
+            "FABRIC_ATLAS_TOKEN",
+        )
+    yield
+
+
+app = FastAPI(title="Fabric Access Atlas API", version="1.0.0", lifespan=lifespan)
 
 
 def get_database() -> Generator[sqlite3.Connection, None, None]:
@@ -59,7 +74,7 @@ def current_auth() -> dict[str, Any]:
     return azure_auth_manager.status()
 
 
-@app.post("/api/auth/login", status_code=202)
+@app.post("/api/auth/login", status_code=202, dependencies=[Depends(require_api_token)])
 def start_login() -> dict[str, Any]:
     try:
         return azure_auth_manager.start()
@@ -67,7 +82,7 @@ def start_login() -> dict[str, Any]:
         raise HTTPException(status_code=409, detail=str(error)) from error
 
 
-@app.delete("/api/auth/current")
+@app.delete("/api/auth/current", dependencies=[Depends(require_api_token)])
 def logout() -> dict[str, Any]:
     try:
         return azure_auth_manager.logout()
@@ -80,7 +95,7 @@ def current_scan() -> dict[str, Any]:
     return scan_manager.status()
 
 
-@app.post("/api/scans", status_code=202)
+@app.post("/api/scans", status_code=202, dependencies=[Depends(require_api_token)])
 def start_scan(request: ScanRequest) -> dict[str, Any]:
     if permission_migration_manager.status()["status"] in ACTIVE_STATUSES:
         raise HTTPException(status_code=409, detail="A permission migration is running. Wait for it to finish or cancel it before scanning.")
@@ -268,7 +283,7 @@ def coverage(database: Database) -> dict[str, Any]:
     }
 
 
-@app.post("/api/tenants/{tenant_id}/directory-users/sync")
+@app.post("/api/tenants/{tenant_id}/directory-users/sync", dependencies=[Depends(require_api_token)])
 def sync_tenant_directory(tenant_id: str) -> dict[str, Any]:
     try:
         count = sync_directory_users(tenant_id)
@@ -282,7 +297,7 @@ def user_mappings(tenant_id: str, database: Database) -> dict[str, Any]:
     return mapping_view(tenant_id, database)
 
 
-@app.put("/api/tenants/{tenant_id}/user-mappings/{source_user_id}")
+@app.put("/api/tenants/{tenant_id}/user-mappings/{source_user_id}", dependencies=[Depends(require_api_token)])
 def update_user_mapping(tenant_id: str, source_user_id: str, request: UserMappingRequest, database: Database) -> dict[str, Any]:
     try:
         set_user_mapping(tenant_id, source_user_id, request.target_user_id, database)
@@ -291,7 +306,7 @@ def update_user_mapping(tenant_id: str, source_user_id: str, request: UserMappin
     return mapping_view(tenant_id, database)
 
 
-@app.delete("/api/tenants/{tenant_id}/user-mappings/{source_user_id}")
+@app.delete("/api/tenants/{tenant_id}/user-mappings/{source_user_id}", dependencies=[Depends(require_api_token)])
 def remove_user_mapping(tenant_id: str, source_user_id: str, database: Database) -> dict[str, Any]:
     delete_user_mapping(tenant_id, source_user_id)
     return mapping_view(tenant_id, database)
@@ -307,7 +322,7 @@ def current_permission_migration() -> dict[str, Any]:
     return permission_migration_manager.status()
 
 
-@app.post("/api/tenants/{tenant_id}/permission-migration", status_code=202)
+@app.post("/api/tenants/{tenant_id}/permission-migration", status_code=202, dependencies=[Depends(require_api_token)])
 def start_permission_migration(tenant_id: str, request: PermissionMigrationRequest, database: Database) -> dict[str, Any]:
     if not request.confirmed:
         raise HTTPException(status_code=400, detail="Explicit confirmation is required before permissions are written.")
@@ -320,7 +335,7 @@ def start_permission_migration(tenant_id: str, request: PermissionMigrationReque
         raise HTTPException(status_code=409, detail=str(error)) from error
 
 
-@app.delete("/api/permission-migrations/current")
+@app.delete("/api/permission-migrations/current", dependencies=[Depends(require_api_token)])
 def cancel_permission_migration() -> dict[str, Any]:
     try:
         return permission_migration_manager.cancel()

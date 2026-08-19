@@ -26,6 +26,13 @@ def test_compose_persists_writable_application_state() -> None:
     assert ":ro" not in compose
 
 
+def test_compose_binds_dashboard_to_localhost_and_passes_api_token() -> None:
+    compose = (ROOT / "compose.yaml").read_text(encoding="utf-8")
+
+    assert '"127.0.0.1:8080:8080"' in compose
+    assert "FABRIC_ATLAS_TOKEN" in compose
+
+
 def test_empty_discovery_source_creates_first_run_database(tmp_path: Path) -> None:
     source = tmp_path / "artifacts"
     source.mkdir()
