@@ -181,7 +181,7 @@ The importer streams JSON and NDJSON into indexed SQLite tables. The API is pagi
 The recommended development environment is the included VS Code dev container. Select **Dev Containers: Reopen in Container**, then run:
 
 ```bash
-python server/import_snapshot.py
+python -m server.import_snapshot
 python -m uvicorn server.app:app --host 0.0.0.0 --port 8080 --reload
 ```
 

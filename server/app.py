@@ -39,7 +39,7 @@ app = FastAPI(title="Fabric Access Atlas API", version="1.0.0", lifespan=lifespa
 
 def get_database() -> Generator[sqlite3.Connection, None, None]:
     if not DEFAULT_DATABASE.exists():
-        raise HTTPException(status_code=503, detail="Snapshot database is not available. Run server/import_snapshot.py first.")
+        raise HTTPException(status_code=503, detail="Snapshot database is not available. Run python -m server.import_snapshot first.")
     connection = connect(DEFAULT_DATABASE, readonly=True)
     try:
         yield connection

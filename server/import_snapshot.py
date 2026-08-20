@@ -1,7 +1,7 @@
 import argparse
 from pathlib import Path
 
-from database import DEFAULT_DATABASE, DEFAULT_SOURCE, import_snapshot
+from .database import DEFAULT_DATABASE, DEFAULT_SOURCE, import_snapshot
 
 
 def main() -> None:

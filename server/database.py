@@ -111,6 +111,14 @@ def connect(database_path: Path = DEFAULT_DATABASE, readonly: bool = False) -> s
     return connection
 
 
+def open_json_bytes(path: Path):
+    """Open a JSON file in binary mode for ijson, skipping a UTF-8 BOM if present."""
+    stream = path.open("rb")
+    if stream.read(3) != b"\xef\xbb\xbf":
+        stream.seek(0)
+    return stream
+
+
 def iter_scan_workspaces(source: Path) -> Iterator[dict[str, Any]]:
     ndjson_path = source / "powerbi-artifact-user-scans.ndjson"
     if ndjson_path.exists():
@@ -125,7 +133,7 @@ def iter_scan_workspaces(source: Path) -> Iterator[dict[str, Any]]:
     json_path = source / "powerbi-artifact-user-scans.json"
     if not json_path.exists():
         return
-    with json_path.open("r", encoding="utf-8-sig") as stream:
+    with open_json_bytes(json_path) as stream:
         yield from ijson.items(stream, "item.workspaces.item")
 
 
@@ -153,7 +161,7 @@ def import_snapshot(source: Path = DEFAULT_SOURCE, database_path: Path = DEFAULT
 
         workspace_path = source / "workspaces.json"
         if workspace_path.exists():
-            with workspace_path.open("r", encoding="utf-8-sig") as stream:
+            with open_json_bytes(workspace_path) as stream:
                 for workspace in ijson.items(stream, "item"):
                     connection.execute(
                         "INSERT OR REPLACE INTO workspaces(id, name, type, state, capacity_id) VALUES (?, ?, ?, ?, ?)",
