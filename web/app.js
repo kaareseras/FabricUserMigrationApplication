@@ -118,7 +118,8 @@ Object.assign(translations.en, {
   "Gennemgå plan": "Review plan", "Indlæser plan...": "Loading plan...", "Workspace-roller": "Workspace roles", "Semantic model-rettigheder": "Semantic model permissions", "Dækket af workspace-rolle": "Covered by workspace role", "Kan ikke kopieres præcist": "Cannot be copied exactly", "Kun rettigheder, som Microsofts API'er kan kopiere præcist, bliver anvendt. Ikke-understøttede rettigheder registreres i resultatrapporten.": "Only permissions that Microsoft's APIs can reproduce exactly are applied. Unsupported permissions are recorded in the result report.",
   "Ikke-understøttede rettigheder": "Unsupported permissions", "{count} rettigheder kan ikke kopieres præcist": "{count} permissions cannot be copied exactly", "{count} workspace-roller anvendes": "{count} workspace roles will be applied", "{count} semantic model-rettigheder anvendes": "{count} semantic model permissions will be applied", "{count} rettigheder dækkes af workspace-roller": "{count} permissions are covered by workspace roles", "Kildebruger": "Source user", "Målbruger": "Target user", "Detalje": "Detail", "Anvendes præcist": "Applied exactly", "Dækket af workspace-rollen {role}": "Covered by workspace role {role}",
   "Jeg har gennemgået planen": "I have reviewed the plan", "Dette starter en skriveoperation mod den valgte tenant.": "This starts a write operation against the selected tenant.", "Anvend rettigheder": "Apply permissions", "Klar til rettighedsmigration": "Ready for permission migration", "Rettighedsmigration": "Permission migration", "Annuller job": "Cancel job",
-  "Ready to apply mapped permissions": "Ready to apply mapped permissions", "Preparing permission migration": "Preparing permission migration", "Applying mapped permissions": "Applying mapped permissions", "Cancelling after the current request": "Cancelling after the current request", "Permission migration completed": "Permission migration completed", "Permission migration cancelled": "Permission migration cancelled", "Permission migration failed": "Permission migration failed",
+  "Klar til at anvende mappede rettigheder": "Ready to apply mapped permissions", "Forbereder rettighedsmigration": "Preparing permission migration", "Anvender mappede rettigheder": "Applying mapped permissions", "Anullerer efter nuværende anmodning": "Cancelling after the current request", "Rettighedsmigration gennemført": "Permission migration completed", "Rettighedsmigration annulleret": "Permission migration cancelled", "Rettighedsmigration fejlede": "Permission migration failed",
+  "Anvender rettighed {current}/{total}: {workspace}": "Applying permission {current}/{total}: {workspace}", "Læser adgang for {count} workspaces": "Reading access for {count} workspaces",
   "Rettighed {current}/{total}": "Permission {current}/{total}", "Venter {seconds} sek. før næste API-kald": "Waiting {seconds}s before the next API call", "Kontrolleret og klar": "Reviewed and ready", "Fejl under migration": "Migration failures", applied: "applied", alreadyApplied: "already applied", failed: "failed", unsupported: "unsupported", total: "total"
 });
 Object.assign(translations.pt, {
@@ -126,7 +127,8 @@ Object.assign(translations.pt, {
   "Gennemgå plan": "Rever plano", "Indlæser plan...": "A carregar plano...", "Workspace-roller": "Funções do espaço de trabalho", "Semantic model-rettigheder": "Permissões do modelo semântico", "Dækket af workspace-rolle": "Coberto pela função do espaço de trabalho", "Kan ikke kopieres præcist": "Não é possível copiar exatamente", "Kun rettigheder, som Microsofts API'er kan kopiere præcist, bliver anvendt. Ikke-understøttede rettigheder registreres i resultatrapporten.": "Apenas são aplicadas permissões que as APIs da Microsoft conseguem reproduzir exatamente. As permissões não suportadas são registadas no relatório.",
   "Ikke-understøttede rettigheder": "Permissões não suportadas", "{count} rettigheder kan ikke kopieres præcist": "Não é possível copiar exatamente {count} permissões", "{count} workspace-roller anvendes": "Serão aplicadas {count} funções do espaço de trabalho", "{count} semantic model-rettigheder anvendes": "Serão aplicadas {count} permissões de modelo semântico", "{count} rettigheder dækkes af workspace-roller": "{count} permissões são cobertas por funções do espaço de trabalho", "Kildebruger": "Utilizador de origem", "Målbruger": "Utilizador de destino", "Detalje": "Detalhe", "Anvendes præcist": "Aplicada exatamente", "Dækket af workspace-rollen {role}": "Coberta pela função do espaço de trabalho {role}",
   "Jeg har gennemgået planen": "Revi o plano", "Dette starter en skriveoperation mod den valgte tenant.": "Isto inicia uma operação de escrita no tenant selecionado.", "Anvend rettigheder": "Aplicar permissões", "Klar til rettighedsmigration": "Pronto para migrar permissões", "Rettighedsmigration": "Migração de permissões", "Annuller job": "Cancelar tarefa",
-  "Ready to apply mapped permissions": "Pronto para aplicar permissões mapeadas", "Preparing permission migration": "A preparar migração de permissões", "Applying mapped permissions": "A aplicar permissões mapeadas", "Cancelling after the current request": "A cancelar após o pedido atual", "Permission migration completed": "Migração de permissões concluída", "Permission migration cancelled": "Migração de permissões cancelada", "Permission migration failed": "A migração de permissões falhou",
+  "Klar til at anvende mappede rettigheder": "Pronto para aplicar permissões mapeadas", "Forbereder rettighedsmigration": "A preparar migração de permissões", "Anvender mappede rettigheder": "A aplicar permissões mapeadas", "Anullerer efter nuværende anmodning": "A cancelar após o pedido atual", "Rettighedsmigration gennemført": "Migração de permissões concluída", "Rettighedsmigration annulleret": "Migração de permissões cancelada", "Rettighedsmigration fejlede": "A migração de permissões falhou",
+  "Anvender rettighed {current}/{total}: {workspace}": "A aplicar permissão {current}/{total}: {workspace}", "Læser adgang for {count} workspaces": "A ler acesso para {count} espaços de trabalho",
   "Rettighed {current}/{total}": "Permissão {current}/{total}", "Venter {seconds} sek. før næste API-kald": "A aguardar {seconds} s antes da próxima chamada à API", "Kontrolleret og klar": "Revisto e pronto", "Fejl under migration": "Falhas na migração", applied: "aplicadas", alreadyApplied: "já aplicadas", failed: "falharam", unsupported: "não suportadas", total: "total"
 });
 Object.assign(translations.da, {
@@ -585,7 +587,7 @@ function renderMigrationPlanDetails(plan) {
 function renderPermissionMigration() {
   if (!byId("migration-stage")) return;
   const plan = state.migrationPlan;
-  const job = state.migrationJob || { status: "idle", progress: 0, stage: "Ready to apply mapped permissions", logs: [], failures: [] };
+  const job = state.migrationJob || { status: "idle", progress: 0, stage: "Klar til at anvende mappede rettigheder", logs: [], failures: [] };
   const active = ["queued", "running", "cancelling"].includes(job.status);
   const tenantSelected = Boolean(byId("mapping-tenant").value);
   const mappedCount = state.userMappings?.sourceUsers.filter((user) => user.targetUserId).length || 0;
@@ -599,7 +601,10 @@ function renderPermissionMigration() {
   renderMigrationPlanDetails(plan);
   byId("migration-confirm").disabled = active;
   byId("migration-start").disabled = active || !plan?.counts.total || !byId("migration-confirm").checked;
-  byId("migration-stage").textContent = t(job.stage);
+  const migrationStageMatch = job.stage?.match(/^Anvender rettighed (\d+)\/(\d+): (.*)$/);
+  byId("migration-stage").textContent = migrationStageMatch
+    ? t("Anvender rettighed {current}/{total}: {workspace}", { current: Number(migrationStageMatch[1]), total: Number(migrationStageMatch[2]), workspace: migrationStageMatch[3] })
+    : t(job.stage);
   byId("migration-percent").textContent = `${job.progress || 0}%`;
   byId("migration-progress-bar").style.width = `${job.progress || 0}%`;
   byId("migration-progress-bar").parentElement.setAttribute("aria-valuenow", job.progress || 0);
@@ -678,9 +683,12 @@ function renderScan() {
   const labels = { idle: "Klar", queued: "I kø", running: "Kører", importing: "Importerer", completed: "Fuldført", failed: "Fejlet" };
   byId("scan-availability").textContent = t(labels[scan.status] || scan.status);
   byId("scan-availability").dataset.status = scan.status;
+  const accessStageMatch = scan.stage?.match(/^Læser adgang for (\d+) workspaces$/);
   byId("scan-stage").textContent = workspaceProgress
     ? t("Scanner workspace {current}/{total}", workspaceProgress)
-    : t(scan.stage);
+    : accessStageMatch
+      ? t("Læser adgang for {count} workspaces", { count: Number(accessStageMatch[1]) })
+      : t(scan.stage);
   byId("scan-percent").textContent = `${scan.progress}%`;
   byId("scan-progress").style.width = `${scan.progress}%`;
   byId("scan-progress").parentElement.setAttribute("aria-valuenow", scan.progress);

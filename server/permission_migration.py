@@ -235,7 +235,7 @@ class PermissionMigrationManager:
     def status(self) -> dict[str, Any]:
         with self._lock:
             if self._job is None:
-                return {"status": "idle", "progress": 0, "stage": "Ready to apply mapped permissions", "logs": []}
+                return {"status": "idle", "progress": 0, "stage": "Klar til at anvende mappede rettigheder", "logs": []}
             return {**self._job, "logs": list(self._job["logs"]), "failures": list(self._job["failures"])}
 
     def start(self, tenant_id: str, plan: dict[str, Any]) -> dict[str, Any]:
@@ -251,7 +251,7 @@ class PermissionMigrationManager:
                 "status": "queued",
                 "tenantId": tenant_id,
                 "progress": 0,
-                "stage": "Preparing permission migration",
+                "stage": "Forbereder rettighedsmigration",
                 "startedAtUtc": utc_now(),
                 "completedAtUtc": None,
                 "current": 0,
@@ -270,7 +270,7 @@ class PermissionMigrationManager:
             if not self._job or self._job["status"] not in ACTIVE_STATUSES:
                 raise RuntimeError("No permission migration is running.")
             self._job["status"] = "cancelling"
-            self._job["stage"] = "Cancelling after the current request"
+            self._job["stage"] = "Anullerer efter nuværende anmodning"
         self._cancel.set()
         return self.status()
 
@@ -417,12 +417,12 @@ class PermissionMigrationManager:
         applied = 0
         resumed = 0
         failed = 0
-        self._update(status="running", stage="Applying mapped permissions")
+        self._update(status="running", stage="Anvender mappede rettigheder")
         try:
             for index, operation in enumerate(plan["operations"], start=1):
                 if self._cancel.is_set():
                     raise InterruptedError("Permission migration cancelled.")
-                self._update(current=index, progress=int(((index - 1) / len(plan["operations"])) * 100), stage=f"Applying permission {index}/{len(plan['operations'])}: {operation['workspaceName']}")
+                self._update(current=index, progress=int(((index - 1) / len(plan["operations"])) * 100), stage=f"Anvender rettighed {index}/{len(plan['operations'])}: {operation['workspaceName']}")
                 if operation["id"] in completed:
                     resumed += 1
                     continue
@@ -442,12 +442,12 @@ class PermissionMigrationManager:
             report_path = self.checkpoint_directory / f"{tenant_id}.result.json"
             report_path.parent.mkdir(parents=True, exist_ok=True)
             report_path.write_text(json.dumps({"completedAtUtc": utc_now(), "result": result, "failures": self.status()["failures"], "unsupported": plan["unsupported"]}, indent=2), encoding="utf-8")
-            self._update(status="completed", progress=100, current=len(plan["operations"]), stage="Permission migration completed", completedAtUtc=utc_now(), result=result, wait=None)
+            self._update(status="completed", progress=100, current=len(plan["operations"]), stage="Rettighedsmigration gennemført", completedAtUtc=utc_now(), result=result, wait=None)
         except InterruptedError:
-            self._update(status="cancelled", stage="Permission migration cancelled", completedAtUtc=utc_now(), wait=None)
+            self._update(status="cancelled", stage="Rettighedsmigration annulleret", completedAtUtc=utc_now(), wait=None)
         except Exception as error:
             self._append_log(str(error))
-            self._update(status="failed", stage="Permission migration failed", completedAtUtc=utc_now(), wait=None)
+            self._update(status="failed", stage="Rettighedsmigration fejlede", completedAtUtc=utc_now(), wait=None)
 
 
 permission_migration_manager = PermissionMigrationManager()
