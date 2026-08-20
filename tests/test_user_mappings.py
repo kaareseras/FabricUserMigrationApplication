@@ -1,4 +1,8 @@
+import io
+import json
 import sqlite3
+import urllib.error
+from types import SimpleNamespace
 
 import pytest
 
@@ -8,6 +12,78 @@ from server.user_mappings import connect_mapping_database, mapping_view, set_use
 
 
 TENANT_ID = "00000000-0000-0000-0000-000000000000"
+
+
+def _patch_graph_transport(monkeypatch, pages: list[dict], failures: dict[int, object] | None = None) -> dict:
+    """Patch Azure CLI token acquisition and the HTTP transport used by _graph_pages."""
+    failures = failures or {}
+    state = {"calls": 0, "sleeps": []}
+
+    def fake_urlopen(request, timeout=None):
+        state["calls"] += 1
+        failure = failures.get(state["calls"])
+        if failure is not None:
+            raise failure(request.full_url)
+        return io.BytesIO(json.dumps(pages.pop(0)).encode("utf-8"))
+
+    monkeypatch.setattr(user_mappings, "find_azure_cli", lambda: "/fake/az")
+    monkeypatch.setattr(
+        user_mappings.subprocess,
+        "run",
+        lambda *args, **kwargs: SimpleNamespace(returncode=0, stdout=json.dumps({"accessToken": "test-token"}), stderr=""),
+    )
+    monkeypatch.setattr(user_mappings.time, "sleep", state["sleeps"].append)
+    monkeypatch.setattr(user_mappings.urllib.request, "urlopen", fake_urlopen)
+    return state
+
+
+def test_graph_pages_retries_transient_rate_limit(monkeypatch) -> None:
+    pages = [
+        {"value": [{"id": "u1", "displayName": "One"}], "@odata.nextLink": "https://graph.microsoft.com/v1.0/users?$skiptoken=2"},
+        {"value": [{"id": "u2", "displayName": "Two"}]},
+    ]
+
+    def rate_limited(url):
+        return urllib.error.HTTPError(url, 429, "Too many requests", {"Retry-After": "3"}, None)
+
+    state = _patch_graph_transport(monkeypatch, pages, failures={1: rate_limited})
+
+    users = list(user_mappings._graph_pages(TENANT_ID))
+
+    assert [user["id"] for user in users] == ["u1", "u2"]
+    assert state["calls"] == 3
+    assert state["sleeps"] == [3.0]
+
+
+def test_graph_pages_does_not_retry_permanent_errors(monkeypatch) -> None:
+    pages = [{"value": []}]
+
+    def forbidden(url):
+        return urllib.error.HTTPError(url, 403, "Forbidden", {}, None)
+
+    state = _patch_graph_transport(monkeypatch, pages, failures={1: forbidden})
+
+    with pytest.raises(RuntimeError, match="user discovery failed"):
+        list(user_mappings._graph_pages(TENANT_ID))
+
+    assert state["calls"] == 1
+    assert state["sleeps"] == []
+
+
+def test_graph_pages_gives_up_after_max_retries(monkeypatch) -> None:
+    pages = [{"value": []}]
+
+    def unavailable(url):
+        return urllib.error.HTTPError(url, 503, "Unavailable", {}, None)
+
+    failures = {call: unavailable for call in range(1, user_mappings.GRAPH_MAX_RETRIES + 2)}
+    state = _patch_graph_transport(monkeypatch, pages, failures=failures)
+
+    with pytest.raises(RuntimeError, match="user discovery failed"):
+        list(user_mappings._graph_pages(TENANT_ID))
+
+    assert state["calls"] == user_mappings.GRAPH_MAX_RETRIES + 1
+    assert state["sleeps"] == [float(min(300.0, 2 ** attempt)) for attempt in range(user_mappings.GRAPH_MAX_RETRIES)]
 
 
 @pytest.fixture

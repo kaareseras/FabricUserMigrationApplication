@@ -77,7 +77,8 @@ function Write-ScanEstimate {
 }
 
 if ([string]::IsNullOrWhiteSpace($OutputPath)) {
-    $OutputPath = Join-Path $PSScriptRoot '..\artifacts\fabric-permission-discovery'
+    # Forward slashes keep the default portable between Windows PowerShell and pwsh on Linux.
+    $OutputPath = Join-Path $PSScriptRoot '../artifacts/fabric-permission-discovery'
 }
 
 function Get-AzCliAccessToken {

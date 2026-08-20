@@ -65,6 +65,14 @@ Then start it normally again so future restarts do not force another import:
 docker compose up -d
 ```
 
+To back up application data without stopping the stack, copy it out of the running container:
+
+```bash
+docker compose cp app:/app/data ./backup-data-$(date +%F)
+```
+
+The `fabric-artifacts` and `azure-config` volumes can be copied the same way from `/app/artifacts/fabric-permission-discovery` and `/app/.azure`.
+
 ## Security
 
 The dashboard binds to localhost only; Docker Compose maps the port as `127.0.0.1:8080:8080`. To reach it from another machine, use an SSH tunnel or a reverse proxy that adds its own authentication — do not expose the container port directly.
@@ -130,6 +138,8 @@ Other artifact rights are reported but not applied. Microsoft does not expose on
 
 Migration operations are paced conservatively and retry HTTP 429, temporary 5xx responses, network failures, and expired tokens. Successful operations are checkpointed in `data/permission-migrations/<tenant-id>.checkpoint.ndjson`, so interrupted or cancelled jobs resume without replaying completed writes. A detailed result report, including unsupported rights and failures, is written to `data/permission-migrations/<tenant-id>.result.json`.
 
+If the server itself restarts while a migration is running, the in-memory job state is lost. Starting the same migration again (same tenant, unchanged user mappings) resumes from the last checkpoint instead of replaying completed writes, because each operation ID is derived deterministically from its permission content. Delete `data/permission-migrations/<tenant-id>.checkpoint.ndjson` to force a full re-run.
+
 Discovery and permission migration cannot run simultaneously. This keeps the permission plan tied to one stable snapshot. A workspace can contain at most 1,000 direct users or groups according to the Fabric API limit.
 
 ## What the scan collects
@@ -182,12 +192,15 @@ The recommended development environment is the included VS Code dev container. S
 
 ```bash
 python -m server.import_snapshot
-python -m uvicorn server.app:app --host 0.0.0.0 --port 8080 --reload
+python -m uvicorn server.app:app --host 127.0.0.1 --port 8080 --reload
 ```
 
-Run tests with:
+Bind to localhost only; the API is unauthenticated unless you set `FABRIC_ATLAS_TOKEN`.
+
+Install development dependencies, then run tests with:
 
 ```bash
+pip install -r requirements-dev.txt
 python -m pytest
 ```
 

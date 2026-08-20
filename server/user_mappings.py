@@ -1,10 +1,14 @@
 import json
 import sqlite3
 import subprocess
+import time
+import urllib.error
 import urllib.parse
 import urllib.request
 from collections.abc import Iterator
 from contextlib import closing
+from datetime import UTC, datetime
+from email.utils import parsedate_to_datetime
 from pathlib import Path
 from typing import Any
 
@@ -14,6 +18,8 @@ from .database import ROOT
 
 DEFAULT_MAPPING_DATABASE = ROOT / "data" / "user-mappings.db"
 GRAPH_USERS_URL = "https://graph.microsoft.com/v1.0/users"
+GRAPH_MAX_RETRIES = 5
+TRANSIENT_GRAPH_STATUS_CODES = frozenset({429, 500, 502, 503, 504})
 MAPPING_SCHEMA = """
 PRAGMA foreign_keys = ON;
 PRAGMA journal_mode = WAL;
@@ -56,6 +62,39 @@ def connect_mapping_database(database_path: Path = DEFAULT_MAPPING_DATABASE) -> 
     return connection
 
 
+def _retry_after_seconds(value: str | None, attempt: int) -> float:
+    """Delay before the next Graph retry: Retry-After when present, otherwise capped exponential backoff."""
+    if value:
+        try:
+            return max(1.0, min(float(value), 300.0))
+        except ValueError:
+            try:
+                return max(1.0, (parsedate_to_datetime(value) - datetime.now(UTC)).total_seconds())
+            except (TypeError, ValueError):
+                pass
+    return float(min(300.0, 2 ** attempt))
+
+
+def _fetch_graph_page(url: str, token: str) -> dict[str, Any]:
+    """Fetch one Graph page, retrying transient HTTP and network failures."""
+    for attempt in range(GRAPH_MAX_RETRIES + 1):
+        request = urllib.request.Request(url, headers={"Authorization": f"Bearer {token}"})
+        try:
+            with urllib.request.urlopen(request, timeout=60) as response:
+                return json.load(response)
+        except urllib.error.HTTPError as error:
+            if error.code not in TRANSIENT_GRAPH_STATUS_CODES or attempt == GRAPH_MAX_RETRIES:
+                raise RuntimeError(f"Microsoft Graph user discovery failed: {error}") from error
+            time.sleep(_retry_after_seconds(error.headers.get("Retry-After") if error.headers else None, attempt))
+        except OSError as error:  # URLError, timeouts, and connection resets are all transient.
+            if attempt == GRAPH_MAX_RETRIES:
+                raise RuntimeError(f"Microsoft Graph user discovery failed: {error}") from error
+            time.sleep(_retry_after_seconds(None, attempt))
+        except json.JSONDecodeError as error:
+            raise RuntimeError("Microsoft Graph returned an invalid JSON response.") from error
+    raise AssertionError("unreachable")
+
+
 def _graph_pages(tenant_id: str) -> Iterator[dict[str, Any]]:
     cli = find_azure_cli()
     if cli is None:
@@ -77,12 +116,7 @@ def _graph_pages(tenant_id: str) -> Iterator[dict[str, Any]]:
     query = urllib.parse.urlencode({"$select": "id,displayName,userPrincipalName,mail,userType,accountEnabled", "$top": "999"})
     url: str | None = f"{GRAPH_USERS_URL}?{query}"
     while url:
-        request = urllib.request.Request(url, headers={"Authorization": f"Bearer {token}"})
-        try:
-            with urllib.request.urlopen(request, timeout=60) as response:
-                page = json.load(response)
-        except Exception as error:
-            raise RuntimeError(f"Microsoft Graph user discovery failed: {error}") from error
+        page = _fetch_graph_page(url, token)
         yield from page.get("value") or []
         url = page.get("@odata.nextLink")
 
