@@ -74,6 +74,32 @@ def test_browser_login_reports_missing_cli(monkeypatch) -> None:
         raise AssertionError("Expected missing Azure CLI to be rejected")
 
 
+def test_existing_session_supports_tenant_without_subscription(monkeypatch) -> None:
+    tenant_account = {
+        "name": "Tenant A",
+        "tenantId": "00000000-0000-0000-0000-000000000000",
+        "isDefault": False,
+        "user": {"name": "admin@example.com", "type": "user"},
+    }
+
+    def fake_run(command, **kwargs):
+        if command[1:3] == ["account", "show"]:
+            return type("Result", (), {"returncode": 1, "stdout": ""})()
+        if command[1:3] == ["account", "list"]:
+            return type("Result", (), {"returncode": 0, "stdout": json.dumps([tenant_account])})()
+        return type("Result", (), {"returncode": 1, "stdout": ""})()
+
+    manager = azure_auth.AzureAuthManager()
+    monkeypatch.setattr(azure_auth, "find_azure_cli", lambda: "/usr/bin/az")
+    monkeypatch.setattr(azure_auth.subprocess, "run", fake_run)
+
+    status = manager.status()
+
+    assert status["status"] == "authenticated"
+    assert status["account"]["user"] == "admin@example.com"
+    assert status["tenants"] == [{"id": tenant_account["tenantId"], "name": tenant_account["tenantId"], "domain": ""}]
+
+
 def test_service_principal_login_uses_cli_without_exposing_secret(monkeypatch) -> None:
     account = {
         "name": "Tenant without subscription",
@@ -132,6 +158,34 @@ def test_failed_service_principal_login_can_be_retried(monkeypatch) -> None:
     assert "sensitive" not in json.dumps(status)
 
 
+def test_logout_cancels_pending_browser_login(monkeypatch) -> None:
+    class FakeProcess:
+        terminated = False
+
+        @staticmethod
+        def poll():
+            return None
+
+        def terminate(self):
+            self.terminated = True
+
+    process = FakeProcess()
+    manager = azure_auth.AzureAuthManager()
+    manager._state = {"status": "waiting", "logs": []}
+    manager._login_process = process
+    monkeypatch.setattr(azure_auth, "find_azure_cli", lambda: "/usr/bin/az")
+    monkeypatch.setattr(
+        azure_auth.subprocess,
+        "run",
+        lambda *args, **kwargs: type("Result", (), {"returncode": 0, "stdout": ""})(),
+    )
+
+    status = manager.logout()
+
+    assert process.terminated
+    assert status["status"] == "idle"
+
+
 def test_device_code_is_parsed_from_azure_cli_output() -> None:
     output = "Open https://microsoft.com/devicelogin and enter the code ABCD-EFGH to authenticate."
 
@@ -156,3 +210,27 @@ def test_scan_inventory_groups_workspaces_under_capacities() -> None:
     assert inventory["workspaceCount"] == 3
     assert [capacity["name"] for capacity in inventory["capacities"]] == ["Finance", "Shared", "Unassigned capacity"]
     assert inventory["capacities"][0]["workspaces"] == [{"id": "ws-1", "name": "Budget", "type": "Workspace"}]
+
+
+def test_scan_inventory_uses_account_matching_tenant(monkeypatch) -> None:
+    tenant_id = "00000000-0000-0000-0000-000000000000"
+    subscription_id = "11111111-1111-1111-1111-111111111111"
+    commands = []
+
+    def fake_run(command, **kwargs):
+        commands.append(command)
+        if command[1:3] == ["account", "list"]:
+            payload = [{"id": subscription_id, "tenantId": tenant_id, "isDefault": False}]
+            return type("Result", (), {"returncode": 0, "stdout": json.dumps(payload)})()
+        return type("Result", (), {"returncode": 0, "stdout": "fabric-token"})()
+
+    manager = azure_auth.AzureAuthManager()
+    monkeypatch.setattr(azure_auth, "find_azure_cli", lambda: "/usr/bin/az")
+    monkeypatch.setattr(azure_auth.subprocess, "run", fake_run)
+    monkeypatch.setattr(manager, "_fabric_collection", lambda *args: [])
+
+    manager.scan_inventory(tenant_id)
+
+    token_command = next(command for command in commands if "get-access-token" in command)
+    assert token_command[token_command.index("--subscription") + 1] == subscription_id
+    assert "--tenant" not in token_command

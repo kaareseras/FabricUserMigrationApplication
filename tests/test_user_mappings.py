@@ -8,7 +8,7 @@ import pytest
 
 from server import user_mappings
 from server.database import SCHEMA
-from server.user_mappings import connect_mapping_database, mapping_view, set_user_mapping, sync_directory_users
+from server.user_mappings import apply_user_mappings, connect_mapping_database, mapping_view, set_user_mapping, sync_directory_users
 
 
 TENANT_ID = "00000000-0000-0000-0000-000000000000"
@@ -137,6 +137,35 @@ def test_target_user_can_only_be_mapped_once(snapshot, mapping_database) -> None
 def test_fabric_user_cannot_be_used_as_target(snapshot, mapping_database) -> None:
     with pytest.raises(ValueError, match="without Fabric presence"):
         set_user_mapping(TENANT_ID, "source-1", "source-2", snapshot, mapping_database)
+
+
+def test_bulk_mapping_is_atomic_and_supports_swapping_targets(snapshot, mapping_database) -> None:
+    apply_user_mappings(
+        TENANT_ID,
+        [("source-1", "target-1"), ("source-2", "target-2")],
+        snapshot,
+        mapping_database,
+    )
+    apply_user_mappings(
+        TENANT_ID,
+        [("source-1", "target-2"), ("source-2", "target-1")],
+        snapshot,
+        mapping_database,
+    )
+
+    with pytest.raises(ValueError, match="only appear once"):
+        apply_user_mappings(
+            TENANT_ID,
+            [("source-1", "target-1"), ("source-2", "target-1")],
+            snapshot,
+            mapping_database,
+        )
+
+    result = mapping_view(TENANT_ID, snapshot, mapping_database)
+    assert {user["id"]: user["targetUserId"] for user in result["sourceUsers"]} == {
+        "source-1": "target-2",
+        "source-2": "target-1",
+    }
 
 
 def test_directory_refresh_preserves_mapping_for_existing_users(monkeypatch, snapshot, mapping_database) -> None:

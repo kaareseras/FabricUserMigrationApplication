@@ -103,7 +103,8 @@ Object.assign(translations.en, {
   "Hent tenant-brugere": "Load tenant users", "Nuværende Fabric-bruger": "Current Fabric user", "Ny bruger uden Fabric-adgang": "New user without Fabric access",
   "Vælg en tenant og hent tenant-brugerne.": "Select a tenant and load its users.", "Vælg ny bruger": "Select new user", "Ikke mappet": "Not mapped", "Mappet": "Mapped",
   "{sources} Fabric-brugere · {targets} mulige mål · {mapped} mappet": "{sources} Fabric users · {targets} possible targets · {mapped} mapped",
-  "Ingen tenant-brugere med Fabric-adgang blev fundet.": "No tenant users with Fabric access were found.", "Henter brugere...": "Loading users..."
+  "Ingen tenant-brugere med Fabric-adgang blev fundet.": "No tenant users with Fabric access were found.", "Henter brugere...": "Loading users...",
+  "Indlæs mapping-CSV": "Load mapping CSV", "Download mapping-CSV": "Download mapping CSV", "Indlæs tenant-brugere, før du importerer en mapping-CSV.": "Load tenant users before importing a mapping CSV.", "CSV-filen skal have kolonnerne SourceUserPrincipalName og TargetUserPrincipalName.": "The CSV must contain the columns SourceUserPrincipalName and TargetUserPrincipalName.", "CSV-filen indeholder ingen mapping-rækker.": "The CSV contains no mapping rows.", "Ukendt kildebruger: {user}": "Unknown source user: {user}", "Ukendt målbruger: {user}": "Unknown target user: {user}", "Kildebrugeren forekommer flere gange: {user}": "Source user appears more than once: {user}", "Målbrugeren forekommer flere gange: {user}": "Target user appears more than once: {user}", "{count} mapping-rækker blev anvendt.": "{count} mapping rows were applied."
 });
 Object.assign(translations.pt, {
   "Brugermapping": "Mapeamento de utilizadores", "Brugermapping for migration": "Mapeamento de utilizadores para migração", "Map nuværende brugere til nye brugere": "Mapear utilizadores atuais para novos utilizadores",
@@ -111,7 +112,8 @@ Object.assign(translations.pt, {
   "Hent tenant-brugere": "Carregar utilizadores do tenant", "Nuværende Fabric-bruger": "Utilizador atual do Fabric", "Ny bruger uden Fabric-adgang": "Novo utilizador sem acesso ao Fabric",
   "Vælg en tenant og hent tenant-brugerne.": "Selecione um tenant e carregue os utilizadores.", "Vælg ny bruger": "Selecionar novo utilizador", "Ikke mappet": "Não mapeado", "Mappet": "Mapeado",
   "{sources} Fabric-brugere · {targets} mulige mål · {mapped} mappet": "{sources} utilizadores do Fabric · {targets} destinos possíveis · {mapped} mapeados",
-  "Ingen tenant-brugere med Fabric-adgang blev fundet.": "Não foram encontrados utilizadores do tenant com acesso ao Fabric.", "Henter brugere...": "A carregar utilizadores..."
+  "Ingen tenant-brugere med Fabric-adgang blev fundet.": "Não foram encontrados utilizadores do tenant com acesso ao Fabric.", "Henter brugere...": "A carregar utilizadores...",
+  "Indlæs mapping-CSV": "Carregar CSV de mapeamento", "Download mapping-CSV": "Transferir CSV de mapeamento", "Indlæs tenant-brugere, før du importerer en mapping-CSV.": "Carregue os utilizadores do tenant antes de importar um CSV de mapeamento.", "CSV-filen skal have kolonnerne SourceUserPrincipalName og TargetUserPrincipalName.": "O CSV deve conter as colunas SourceUserPrincipalName e TargetUserPrincipalName.", "CSV-filen indeholder ingen mapping-rækker.": "O CSV não contém linhas de mapeamento.", "Ukendt kildebruger: {user}": "Utilizador de origem desconhecido: {user}", "Ukendt målbruger: {user}": "Utilizador de destino desconhecido: {user}", "Kildebrugeren forekommer flere gange: {user}": "O utilizador de origem aparece mais de uma vez: {user}", "Målbrugeren forekommer flere gange: {user}": "O utilizador de destino aparece mais de uma vez: {user}", "{count} mapping-rækker blev anvendt.": "Foram aplicadas {count} linhas de mapeamento."
 });
 Object.assign(translations.en, {
   "PERMISSION MIGRATION": "PERMISSION MIGRATION", "Anvend de mappede rettigheder": "Apply mapped permissions", "Rettigheder tilføjes til de nye brugere. De oprindelige brugeres rettigheder ændres ikke.": "Permissions are added to new users. The original users' permissions are not changed.",
@@ -135,23 +137,24 @@ Object.assign(translations.da, {
   "The available Microsoft write APIs cannot reproduce this item type and access right exactly.": "De tilgængelige Microsoft-skrive-API'er kan ikke genskabe denne item-type og rettighed præcist.",
   "This workspace role is not supported by the Fabric role-assignment API.": "Denne workspace-rolle understøttes ikke af Fabrics API til rolletildeling.",
   Authentication: "Godkendelse", "AZURE AUTHENTICATION": "AZURE-GODKENDELSE", "Connect to Microsoft Fabric": "Opret forbindelse til Microsoft Fabric", "Choose delegated Microsoft sign-in for interactive use or a service principal for unattended operation.": "Vælg delegeret Microsoft-login til interaktiv brug eller en service principal til automatiseret drift.",
-  DELEGATED: "DELEGERET", "Microsoft account": "Microsoft-konto", "Current session": "Aktuel session", AUTOMATION: "AUTOMATISERING", "Service principal": "Service principal", "Tenant ID": "Tenant-ID", "Client ID": "Klient-ID", "Client secret": "Klienthemmelighed", "Client secret value": "Værdi for klienthemmelighed", "The secret is used only for this Azure CLI login and is not stored by the application.": "Hemmeligheden bruges kun til dette Azure CLI-login og gemmes ikke af applikationen.", "Sign in with service principal": "Log ind med service principal", "Application API token": "Applikationens API-token", "Required for sign-in and other changes when FABRIC_ATLAS_TOKEN is configured.": "Kræves til login og andre ændringer, når FABRIC_ATLAS_TOKEN er konfigureret.", "Not signed in": "Ikke logget ind"
+  DELEGATED: "DELEGERET", "Microsoft account": "Microsoft-konto", "Current session": "Aktuel session", AUTOMATION: "AUTOMATISERING", "Service principal": "Service principal", "Tenant ID": "Tenant-ID", "Client ID": "Klient-ID", "Client secret": "Klienthemmelighed", "Client secret value": "Værdi for klienthemmelighed", "The secret is used only for this Azure CLI login and is not stored by the application.": "Hemmeligheden bruges kun til dette Azure CLI-login og gemmes ikke af applikationen.", "Sign in with service principal": "Log ind med service principal", "Application API token": "Applikationens API-token", "Required for sign-in and other changes when FABRIC_ATLAS_TOKEN is configured.": "Kræves til login og andre ændringer, når FABRIC_ATLAS_TOKEN er konfigureret.", "Not signed in": "Ikke logget ind", "Annuller login": "Annuller login"
 });
 Object.assign(translations.pt, {
   "The available Microsoft write APIs cannot reproduce this item type and access right exactly.": "As APIs de escrita disponíveis da Microsoft não conseguem reproduzir exatamente este tipo de item e direito de acesso.",
   "This workspace role is not supported by the Fabric role-assignment API.": "Esta função do espaço de trabalho não é suportada pela API de atribuição de funções do Fabric.",
   Authentication: "Autenticação", "AZURE AUTHENTICATION": "AUTENTICAÇÃO DO AZURE", "Connect to Microsoft Fabric": "Ligar ao Microsoft Fabric", "Choose delegated Microsoft sign-in for interactive use or a service principal for unattended operation.": "Escolha o início de sessão Microsoft delegado para utilização interativa ou um principal de serviço para operação automática.",
-  DELEGATED: "DELEGADO", "Microsoft account": "Conta Microsoft", "Current session": "Sessão atual", AUTOMATION: "AUTOMAÇÃO", "Service principal": "Principal de serviço", "Tenant ID": "ID do tenant", "Client ID": "ID do cliente", "Client secret": "Segredo do cliente", "Client secret value": "Valor do segredo do cliente", "The secret is used only for this Azure CLI login and is not stored by the application.": "O segredo é usado apenas neste início de sessão da CLI do Azure e não é armazenado pela aplicação.", "Sign in with service principal": "Iniciar sessão com principal de serviço", "Application API token": "Token da API da aplicação", "Required for sign-in and other changes when FABRIC_ATLAS_TOKEN is configured.": "Necessário para iniciar sessão e fazer outras alterações quando FABRIC_ATLAS_TOKEN está configurado.", "Not signed in": "Sessão não iniciada"
+  DELEGATED: "DELEGADO", "Microsoft account": "Conta Microsoft", "Current session": "Sessão atual", AUTOMATION: "AUTOMAÇÃO", "Service principal": "Principal de serviço", "Tenant ID": "ID do tenant", "Client ID": "ID do cliente", "Client secret": "Segredo do cliente", "Client secret value": "Valor do segredo do cliente", "The secret is used only for this Azure CLI login and is not stored by the application.": "O segredo é usado apenas neste início de sessão da CLI do Azure e não é armazenado pela aplicação.", "Sign in with service principal": "Iniciar sessão com principal de serviço", "Application API token": "Token da API da aplicação", "Required for sign-in and other changes when FABRIC_ATLAS_TOKEN is configured.": "Necessário para iniciar sessão e fazer outras alterações quando FABRIC_ATLAS_TOKEN está configurado.", "Not signed in": "Sessão não iniciada", "Annuller login": "Cancelar início de sessão"
 });
 Object.assign(translations.en, {
   "API-token": "API token",
   "Indtast token (FABRIC_ATLAS_TOKEN)": "Enter the token from FABRIC_ATLAS_TOKEN",
   "Gem": "Save",
   "Gemmes kun i denne browser og bruges, når serveren kræver et token.": "Stored only in this browser; used when the server requires a token.",
-  "API-token mangler eller er ugyldig": "Missing or invalid API token"
+  "API-token mangler eller er ugyldig": "Missing or invalid API token", "Annuller login": "Cancel sign-in"
   , "Kapaciteter og workspaces": "Capacities and workspaces", "Vælg en tenant for at hente workspaces.": "Select a tenant to load workspaces.", "Vælg en kapacitet for at vælge eller fravælge alle dens workspaces.": "Select a capacity to select or clear all of its workspaces.",
   "{count} valgt": "{count} selected", "Henter kapaciteter og workspaces...": "Loading capacities and workspaces...", "Ingen kapaciteter eller workspaces blev fundet.": "No capacities or workspaces were found.", "Ingen workspaces": "No workspaces", "Vælg alle workspaces i {capacity}": "Select all workspaces in {capacity}", "Vælg mindst ét workspace": "Select at least one workspace", "Baseret på {count} valgte workspaces": "Based on {count} selected workspaces",
-  "SCAN SELECTION": "SCAN SELECTION", "SENESTE SNAPSHOT": "LATEST SNAPSHOT", "Workspace-detaljer": "Workspace details", "Gå til scan": "Go to scan", "{count} workspaces valgt": "{count} workspaces selected", "Administrer valget under Workspaces.": "Manage the selection under Workspaces.", "Vælg workspaces": "Select workspaces"
+  "SCAN SELECTION": "SCAN SELECTION", "SENESTE SNAPSHOT": "LATEST SNAPSHOT", "Workspace-detaljer": "Workspace details", "Gå til scan": "Go to scan", "{count} workspaces valgt": "{count} workspaces selected", "Administrer valget under Workspaces.": "Manage the selection under Workspaces.", "Vælg workspaces": "Select workspaces",
+  "Indlæs CSV": "Load CSV", "Download eksempel-CSV": "Download example CSV", "Indlæs workspaces, før du importerer en CSV.": "Load workspaces before importing a CSV.", "CSV-filen skal have præcis én kolonne.": "The CSV file must contain exactly one column.", "CSV-filen har et uafsluttet anførselstegn.": "The CSV file contains an unterminated quote.", "{matched} workspace-navne matchede.": "{matched} workspace names matched.", "Ikke fundet: {names}": "Not found: {names}"
 });
 Object.assign(translations.pt, {
   "API-token": "Token da API",
@@ -161,7 +164,8 @@ Object.assign(translations.pt, {
   "API-token mangler eller er ugyldig": "Token da API em falta ou inválido"
   , "Kapaciteter og workspaces": "Capacidades e espaços de trabalho", "Vælg en tenant for at hente workspaces.": "Selecione um tenant para carregar os espaços de trabalho.", "Vælg en kapacitet for at vælge eller fravælge alle dens workspaces.": "Selecione uma capacidade para selecionar ou desmarcar todos os seus espaços de trabalho.",
   "{count} valgt": "{count} selecionados", "Henter kapaciteter og workspaces...": "A carregar capacidades e espaços de trabalho...", "Ingen kapaciteter eller workspaces blev fundet.": "Não foram encontradas capacidades ou espaços de trabalho.", "Ingen workspaces": "Sem espaços de trabalho", "Vælg alle workspaces i {capacity}": "Selecionar todos os espaços de trabalho em {capacity}", "Vælg mindst ét workspace": "Selecione pelo menos um espaço de trabalho", "Baseret på {count} valgte workspaces": "Com base em {count} espaços de trabalho selecionados",
-  "SCAN SELECTION": "SELEÇÃO DA ANÁLISE", "SENESTE SNAPSHOT": "SNAPSHOT MAIS RECENTE", "Workspace-detaljer": "Detalhes dos espaços de trabalho", "Gå til scan": "Ir para análise", "{count} workspaces valgt": "{count} espaços de trabalho selecionados", "Administrer valget under Workspaces.": "Gira a seleção em Espaços de trabalho.", "Vælg workspaces": "Selecionar espaços de trabalho"
+  "SCAN SELECTION": "SELEÇÃO DA ANÁLISE", "SENESTE SNAPSHOT": "SNAPSHOT MAIS RECENTE", "Workspace-detaljer": "Detalhes dos espaços de trabalho", "Gå til scan": "Ir para análise", "{count} workspaces valgt": "{count} espaços de trabalho selecionados", "Administrer valget under Workspaces.": "Gira a seleção em Espaços de trabalho.", "Vælg workspaces": "Selecionar espaços de trabalho",
+  "Indlæs CSV": "Carregar CSV", "Download eksempel-CSV": "Transferir CSV de exemplo", "Indlæs workspaces, før du importerer en CSV.": "Carregue os espaços de trabalho antes de importar um CSV.", "CSV-filen skal have præcis én kolonne.": "O ficheiro CSV deve conter exatamente uma coluna.", "CSV-filen har et uafsluttet anførselstegn.": "O ficheiro CSV contém aspas não terminadas.", "{matched} workspace-navne matchede.": "{matched} nomes de espaços de trabalho correspondem.", "Ikke fundet: {names}": "Não encontrados: {names}"
 });
 
 function detectLanguage() {
@@ -196,6 +200,7 @@ const state = {
   scanInventory: null,
   scanInventoryTenant: null,
   scanInventoryLoading: false,
+  scanInventoryError: null,
   scan: null,
   scanTimer: null,
   scanWasActive: false
@@ -331,6 +336,72 @@ function selectedWorkspaceIds() {
   return [...document.querySelectorAll("#scan-workspace-tree input[data-workspace-id]:checked")].map((input) => input.dataset.workspaceId);
 }
 
+function parseCsvRows(text) {
+  const rows = [];
+  let row = [];
+  let field = "";
+  let quoted = false;
+  const content = text.replace(/^\uFEFF/, "");
+  for (let index = 0; index < content.length; index += 1) {
+    const character = content[index];
+    if (character === '"') {
+      if (quoted && content[index + 1] === '"') { field += '"'; index += 1; }
+      else if (quoted) quoted = false;
+      else if (!field.trim()) quoted = true;
+      else field += character;
+    } else if (quoted) field += character;
+    else if (character === ",") { row.push(field.trim()); field = ""; }
+    else if (character === "\n") {
+      row.push(field.trim());
+      if (row.some(Boolean)) rows.push(row);
+      row = [];
+      field = "";
+    }
+    else if (character !== "\r") field += character;
+  }
+  if (quoted) throw new Error(t("CSV-filen har et uafsluttet anførselstegn."));
+  row.push(field.trim());
+  if (row.some(Boolean)) rows.push(row);
+  return rows;
+}
+
+function parseWorkspaceNamesCsv(text) {
+  const rows = parseCsvRows(text);
+  if (rows.some((row) => row.length !== 1)) throw new Error(t("CSV-filen skal have præcis én kolonne."));
+  const names = rows.map((row) => row[0]).filter(Boolean);
+  if (["workspace", "workspacename", "workspace name"].includes(names[0]?.toLowerCase())) names.shift();
+  return names;
+}
+
+async function importWorkspaceSelection(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const status = byId("workspace-csv-status");
+  try {
+    const inputs = [...document.querySelectorAll("#scan-workspace-tree input[data-workspace-id]")];
+    if (!inputs.length) throw new Error(t("Indlæs workspaces, før du importerer en CSV."));
+    const names = parseWorkspaceNamesCsv(await file.text());
+    const requested = new Map(names.map((name) => [name.toLowerCase(), name]));
+    const matched = new Set();
+    inputs.forEach((input) => {
+      const workspaceName = input.closest("label")?.querySelector("strong")?.textContent.trim() || "";
+      input.checked = requested.has(workspaceName.toLowerCase());
+      if (input.checked) matched.add(workspaceName.toLowerCase());
+    });
+    updateCapacityCheckboxes();
+    const missing = [...requested].filter(([key]) => !matched.has(key)).map(([, name]) => name);
+    status.textContent = `${t("{matched} workspace-navne matchede.", { matched: matched.size.toLocaleString(localeName()) })}${missing.length ? ` ${t("Ikke fundet: {names}", { names: missing.join(", ") })}` : ""}`;
+    status.dataset.status = missing.length ? "warning" : "success";
+    status.classList.remove("hidden");
+  } catch (error) {
+    status.textContent = error.message;
+    status.dataset.status = "error";
+    status.classList.remove("hidden");
+  } finally {
+    event.target.value = "";
+  }
+}
+
 function updateCapacityCheckboxes() {
   document.querySelectorAll("#scan-workspace-tree input[data-capacity-id]").forEach((capacityInput) => {
     const children = [...document.querySelectorAll(`#scan-workspace-tree input[data-parent-capacity="${capacityInput.dataset.capacityId}"]`)];
@@ -347,8 +418,14 @@ function updateCapacityCheckboxes() {
 
 function renderScanInventory() {
   const tree = byId("scan-workspace-tree");
+  byId("workspace-snapshot-details").classList.toggle("hidden", state.scanInventoryLoading);
   if (state.scanInventoryLoading) {
     tree.innerHTML = `<p class="workspace-tree-message">${t("Henter kapaciteter og workspaces...")}</p>`;
+    return;
+  }
+  if (state.scanInventoryError) {
+    tree.innerHTML = `<p class="workspace-tree-message">${escapeHtml(state.scanInventoryError)}</p>`;
+    byId("scan-selection-count").textContent = t("{count} valgt", { count: "0" });
     return;
   }
   if (!state.scanInventory) {
@@ -382,6 +459,7 @@ async function loadScanInventory() {
   const tenantId = byId("scan-tenant").value.trim();
   state.scanInventory = null;
   state.scanInventoryTenant = null;
+  state.scanInventoryError = null;
   if (!tenantId) {
     renderScanInventory();
     renderScan();
@@ -394,6 +472,7 @@ async function loadScanInventory() {
     state.scanInventory = await api(`/scans/inventory?tenantId=${encodeURIComponent(tenantId)}&includePersonalWorkspaces=${includePersonal}`);
     state.scanInventoryTenant = tenantId;
   } catch (error) {
+    state.scanInventoryError = error.message;
     byId("scan-form-error").textContent = error.message;
     byId("scan-form-error").classList.remove("hidden");
   } finally {
@@ -562,6 +641,10 @@ function renderUserMappings() {
   }) : "";
   byId("mapping-sync").disabled = state.mappingBusy || !byId("mapping-tenant").value;
   byId("mapping-sync").textContent = t(state.mappingBusy ? "Henter brugere..." : "Hent tenant-brugere");
+  const csvEnabled = hasUsers && !state.mappingBusy;
+  byId("mapping-csv-input").disabled = !csvEnabled;
+  byId("mapping-csv-upload-label").classList.toggle("disabled", !csvEnabled);
+  byId("mapping-csv-download").disabled = !csvEnabled;
   if (!hasUsers) { byId("mapping-body").innerHTML = ""; return; }
   byId("mapping-body").innerHTML = data.sourceUsers.map((source) => `
     <tr><td class="person-cell"><strong>${escapeHtml(source.displayName)}</strong><span>${escapeHtml(source.userPrincipalName || source.mail)}</span></td>
@@ -589,6 +672,83 @@ async function saveUserMapping(event) {
     showMappingError(error);
   } finally {
     state.mappingBusy = false;
+    renderUserMappings();
+  }
+}
+
+const normalizedIdentity = (value) => String(value || "").trim().toLowerCase();
+
+function mappingIdentityIndex(users) {
+  const index = new Map();
+  users.forEach((user) => {
+    [user.id, user.userPrincipalName, user.mail].filter(Boolean).forEach((identity) => index.set(normalizedIdentity(identity), user));
+  });
+  return index;
+}
+
+function csvCell(value) {
+  return `"${String(value || "").replaceAll('"', '""')}"`;
+}
+
+function downloadUserMappingsCsv() {
+  const data = state.userMappings;
+  if (!data?.sourceUsers.length) return;
+  const targetById = new Map(data.targetUsers.map((user) => [user.id, user]));
+  const rows = ["SourceUserPrincipalName,TargetUserPrincipalName", ...data.sourceUsers.map((source) => {
+    const target = targetById.get(source.targetUserId);
+    return `${csvCell(source.userPrincipalName || source.mail)},${csvCell(target?.userPrincipalName || target?.mail)}`;
+  })];
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(new Blob([`\uFEFF${rows.join("\r\n")}\r\n`], { type: "text/csv;charset=utf-8" }));
+  link.download = `user-mappings-${byId("mapping-tenant").value}.csv`;
+  link.click();
+  URL.revokeObjectURL(link.href);
+}
+
+async function importUserMappingsCsv(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const status = byId("mapping-csv-status");
+  try {
+    const data = state.userMappings;
+    if (!data?.sourceUsers.length) throw new Error(t("Indlæs tenant-brugere, før du importerer en mapping-CSV."));
+    const rows = parseCsvRows(await file.text());
+    const header = rows.shift()?.map((value) => normalizedIdentity(value).replaceAll(" ", ""));
+    if (header?.length !== 2 || header[0] !== "sourceuserprincipalname" || header[1] !== "targetuserprincipalname" || rows.some((row) => row.length !== 2)) {
+      throw new Error(t("CSV-filen skal have kolonnerne SourceUserPrincipalName og TargetUserPrincipalName."));
+    }
+    if (!rows.length) throw new Error(t("CSV-filen indeholder ingen mapping-rækker."));
+    const sourceIndex = mappingIdentityIndex(data.sourceUsers);
+    const targetIndex = mappingIdentityIndex(data.targetUsers);
+    const sourceIds = new Set();
+    const targetIds = new Set();
+    const mappings = rows.map(([sourceIdentity, targetIdentity]) => {
+      const source = sourceIndex.get(normalizedIdentity(sourceIdentity));
+      if (!source) throw new Error(t("Ukendt kildebruger: {user}", { user: sourceIdentity }));
+      if (sourceIds.has(source.id)) throw new Error(t("Kildebrugeren forekommer flere gange: {user}", { user: sourceIdentity }));
+      sourceIds.add(source.id);
+      if (!targetIdentity) return { sourceUserId: source.id, targetUserId: null };
+      const target = targetIndex.get(normalizedIdentity(targetIdentity));
+      if (!target) throw new Error(t("Ukendt målbruger: {user}", { user: targetIdentity }));
+      if (targetIds.has(target.id)) throw new Error(t("Målbrugeren forekommer flere gange: {user}", { user: targetIdentity }));
+      targetIds.add(target.id);
+      return { sourceUserId: source.id, targetUserId: target.id };
+    });
+    state.mappingBusy = true;
+    renderUserMappings();
+    state.userMappings = await api(`/tenants/${encodeURIComponent(byId("mapping-tenant").value)}/user-mappings`, { method: "PUT", body: { mappings } });
+    invalidateMigrationPlan();
+    byId("mapping-error").classList.add("hidden");
+    status.textContent = t("{count} mapping-rækker blev anvendt.", { count: mappings.length.toLocaleString(localeName()) });
+    status.dataset.status = "success";
+    status.classList.remove("hidden");
+  } catch (error) {
+    status.textContent = error.message;
+    status.dataset.status = "error";
+    status.classList.remove("hidden");
+  } finally {
+    state.mappingBusy = false;
+    event.target.value = "";
     renderUserMappings();
   }
 }
@@ -842,7 +1002,8 @@ function renderAuth() {
   if (!mappingTenant.value && auth.tenants?.length === 1) mappingTenant.value = auth.tenants[0].id;
   byId("auth-login").disabled = waiting || auth.status === "unavailable";
   byId("auth-login").textContent = t(waiting ? "Afventer Microsoft..." : auth.status === "unavailable" ? "Kræver container-rebuild" : authenticated ? "Skift konto" : "Log ind med Microsoft");
-  byId("auth-logout").classList.toggle("hidden", !authenticated);
+  byId("auth-logout").classList.toggle("hidden", !authenticated && !waiting);
+  byId("auth-logout").textContent = t(waiting ? "Annuller login" : "Log ud");
   byId("sp-login").disabled = waiting || auth.status === "unavailable";
   renderScan();
   renderUserMappings();
@@ -904,9 +1065,11 @@ async function logout() {
   const error = byId("auth-error");
   error.classList.add("hidden");
   try {
+    clearTimeout(state.authTimer);
     state.auth = await api("/auth/current", { method: "DELETE" });
     state.scanInventory = null;
     state.scanInventoryTenant = null;
+    state.scanInventoryError = null;
     renderAuth();
     renderScanInventory();
   } catch (authError) {
@@ -1012,6 +1175,7 @@ function bindEvents() {
   byId("scan-tenant").addEventListener("change", loadScanInventory);
   byId("scan-artifacts").addEventListener("change", renderScanEstimate);
   byId("scan-personal").addEventListener("change", loadScanInventory);
+  byId("workspace-csv-input").addEventListener("change", importWorkspaceSelection);
   byId("scan-workspace-tree").addEventListener("click", (event) => {
     if (event.target.matches("input[data-capacity-id]")) event.stopPropagation();
   });
@@ -1025,6 +1189,8 @@ function bindEvents() {
   byId("scan-form").addEventListener("submit", startScan);
   byId("mapping-tenant").addEventListener("change", () => { invalidateMigrationPlan(); loadUserMappings(); });
   byId("mapping-sync").addEventListener("click", syncDirectoryUsers);
+  byId("mapping-csv-input").addEventListener("change", importUserMappingsCsv);
+  byId("mapping-csv-download").addEventListener("click", downloadUserMappingsCsv);
   byId("migration-plan-load").addEventListener("click", loadPermissionMigrationPlan);
   document.querySelectorAll("[data-migration-detail]").forEach((button) => button.addEventListener("click", () => {
     state.migrationPlanDetail = button.dataset.migrationDetail;

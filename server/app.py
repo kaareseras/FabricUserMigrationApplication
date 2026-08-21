@@ -18,7 +18,7 @@ from .database import DEFAULT_DATABASE, ROOT, connect
 from .permission_migration import ACTIVE_STATUSES, build_permission_plan, permission_migration_manager
 from .scan_jobs import scan_manager
 from .security import configured_token, require_api_token
-from .user_mappings import delete_user_mapping, mapping_view, set_user_mapping, sync_directory_users
+from .user_mappings import apply_user_mappings, delete_user_mapping, mapping_view, set_user_mapping, sync_directory_users
 
 
 WEB_ROOT = ROOT / "web"
@@ -67,6 +67,15 @@ class ServicePrincipalLoginRequest(BaseModel):
 
 class UserMappingRequest(BaseModel):
     target_user_id: str = Field(alias="targetUserId", min_length=1, max_length=200)
+
+
+class UserMappingImportItem(BaseModel):
+    source_user_id: str = Field(alias="sourceUserId", min_length=1, max_length=200)
+    target_user_id: str | None = Field(default=None, alias="targetUserId", max_length=200)
+
+
+class UserMappingImportRequest(BaseModel):
+    mappings: list[UserMappingImportItem] = Field(max_length=100000)
 
 
 class PermissionMigrationRequest(BaseModel):
@@ -326,6 +335,19 @@ def sync_tenant_directory(tenant_id: str) -> dict[str, Any]:
 
 @app.get("/api/tenants/{tenant_id}/user-mappings")
 def user_mappings(tenant_id: str, database: Database) -> dict[str, Any]:
+    return mapping_view(tenant_id, database)
+
+
+@app.put("/api/tenants/{tenant_id}/user-mappings", dependencies=[Depends(require_api_token)])
+def import_user_mappings(tenant_id: str, request: UserMappingImportRequest, database: Database) -> dict[str, Any]:
+    try:
+        apply_user_mappings(
+            tenant_id,
+            [(mapping.source_user_id, mapping.target_user_id) for mapping in request.mappings],
+            database,
+        )
+    except ValueError as error:
+        raise HTTPException(status_code=409, detail=str(error)) from error
     return mapping_view(tenant_id, database)
 
 

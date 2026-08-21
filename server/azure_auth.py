@@ -142,8 +142,26 @@ class AzureAuthManager:
         cli = find_azure_cli()
         if cli is None:
             raise RuntimeError("Azure CLI is not installed on the server.")
+        token_scope = ["--tenant", tenant_id]
+        try:
+            account_result = subprocess.run(
+                [cli, "account", "list", "--all", "--output", "json"],
+                capture_output=True,
+                text=True,
+                timeout=10,
+                check=False,
+            )
+            if account_result.returncode == 0:
+                account = next(
+                    (item for item in json.loads(account_result.stdout) if item.get("tenantId") == tenant_id and item.get("id")),
+                    None,
+                )
+                if account is not None:
+                    token_scope = ["--subscription", account["id"]]
+        except (json.JSONDecodeError, OSError, subprocess.TimeoutExpired):
+            pass
         token_result = subprocess.run(
-            [cli, "account", "get-access-token", "--tenant", tenant_id, "--resource", FABRIC_RESOURCE, "--query", "accessToken", "-o", "tsv"],
+            [cli, "account", "get-access-token", *token_scope, "--resource", FABRIC_RESOURCE, "--query", "accessToken", "-o", "tsv"],
             capture_output=True,
             text=True,
             timeout=30,
@@ -168,6 +186,11 @@ class AzureAuthManager:
                 with urllib.request.urlopen(request, timeout=60) as response:
                     payload = json.load(response)
             except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, json.JSONDecodeError) as error:
+                if isinstance(error, urllib.error.HTTPError) and error.code in {401, 403}:
+                    raise RuntimeError(
+                        "Signed in, but this account is not authorized to read Fabric admin workspaces. "
+                        "Use a Fabric administrator account or grant the required Fabric API permissions."
+                    ) from error
                 detail = getattr(error, "reason", None) or str(error)
                 raise RuntimeError(f"Fabric inventory request failed: {detail}") from error
             items.extend(payload.get(property_name) or [])
@@ -201,6 +224,19 @@ class AzureAuthManager:
             if result.returncode == 0:
                 account = json.loads(result.stdout)
                 return self._authenticated_state(account, self._list_tenants(cli, account))
+
+            result = subprocess.run(
+                [cli, "account", "list", "--all", "--output", "json"],
+                capture_output=True,
+                text=True,
+                timeout=10,
+                check=False,
+            )
+            if result.returncode == 0:
+                accounts = json.loads(result.stdout)
+                account = next((item for item in accounts if item.get("isDefault")), accounts[0] if accounts else None)
+                if account is not None:
+                    return self._authenticated_state(account, self._list_tenants(cli, account))
         except (json.JSONDecodeError, OSError, subprocess.TimeoutExpired):
             pass
         return self._idle_state()

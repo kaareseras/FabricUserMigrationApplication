@@ -24,12 +24,12 @@
 
       <nav class="nav" aria-label="Primær navigation">
         <button class="nav-item active" data-view="overview"><span class="nav-icon">⌂</span>Overblik</button>
-        <button class="nav-item" data-view="permissions"><span class="nav-icon">≡</span>Rettigheder</button>
+        <button class="nav-item" data-view="auth"><span class="nav-icon">⚿</span>Authentication</button>
         <button class="nav-item" data-view="workspaces"><span class="nav-icon">▦</span>Workspaces</button>
+        <button class="nav-item" data-view="scan"><span class="nav-icon">↻</span>Start scan</button>
+        <button class="nav-item" data-view="permissions"><span class="nav-icon">≡</span>Rettigheder</button>
         <button class="nav-item" data-view="mappings"><span class="nav-icon">⇄</span>Brugermapping</button>
         <button class="nav-item" data-view="coverage"><span class="nav-icon">✓</span>API-dækning</button>
-        <button class="nav-item" data-view="auth"><span class="nav-icon">⚿</span>Authentication</button>
-        <button class="nav-item" data-view="scan"><span class="nav-icon">↻</span>Start scan</button>
       </nav>
 
       <div class="sidebar-footer">
@@ -137,17 +137,24 @@
             </div>
             <div class="workspace-selection-footer">
               <span class="field-hint">Vælg en kapacitet for at vælge eller fravælge alle dens workspaces.</span>
-              <button class="secondary-button" type="button" data-go="scan">Gå til scan</button>
+              <div class="workspace-selection-actions">
+                <label class="secondary-button workspace-csv-button" for="workspace-csv-input"><span aria-hidden="true">↑</span> Indlæs CSV<input id="workspace-csv-input" type="file" accept=".csv,text/csv" hidden></label>
+                <a class="secondary-button workspace-csv-button" href="/assets/workspace-selection-example.csv" download><span aria-hidden="true">↓</span> Download eksempel-CSV</a>
+                <button class="secondary-button" type="button" data-go="scan">Gå til scan</button>
+              </div>
             </div>
+            <p id="workspace-csv-status" class="workspace-csv-status hidden" aria-live="polite"></p>
           </section>
 
-          <div class="workspace-snapshot-heading"><div><p class="eyebrow">SENESTE SNAPSHOT</p><h2>Workspace-detaljer</h2></div></div>
-          <div class="toolbar compact-toolbar">
-            <label class="search-field"><span>⌕</span><input id="workspace-search" type="search" placeholder="Søg workspace..."></label>
-            <div class="view-switch" role="group" aria-label="Visning"><button class="active" data-layout="grid">▦</button><button data-layout="list">≡</button></div>
+          <div id="workspace-snapshot-details">
+            <div class="workspace-snapshot-heading"><div><p class="eyebrow">SENESTE SNAPSHOT</p><h2>Workspace-detaljer</h2></div></div>
+            <div class="toolbar compact-toolbar">
+              <label class="search-field"><span>⌕</span><input id="workspace-search" type="search" placeholder="Søg workspace..."></label>
+              <div class="view-switch" role="group" aria-label="Visning"><button class="active" data-layout="grid">▦</button><button data-layout="list">≡</button></div>
+            </div>
+            <div id="workspace-grid" class="workspace-grid"></div>
+            <div id="workspaces-pagination" class="pagination"></div>
           </div>
-          <div id="workspace-grid" class="workspace-grid"></div>
-          <div id="workspaces-pagination" class="pagination"></div>
         </section>
 
         <section id="mappings-view" class="view">
@@ -155,11 +162,14 @@
             <div><p class="eyebrow">MIGRATION</p><h2>Map nuværende brugere til nye brugere</h2><p>Listen viser tenant-brugere med Fabric-adgang. Hver kan kun mappes til én tenant-bruger uden Fabric-adgang, og samme målbruger kan ikke genbruges.</p></div>
           </div>
           <div class="mapping-toolbar">
-            <label><span>Tenant</span><select id="mapping-tenant" disabled><option value="">Log ind for at hente tenants</option></select></label>
+            <label class="mapping-tenant-field"><span>Tenant</span><select id="mapping-tenant" disabled><option value="">Log ind for at hente tenants</option></select></label>
             <button id="mapping-sync" class="secondary-button" type="button" disabled>Hent tenant-brugere</button>
+            <label id="mapping-csv-upload-label" class="secondary-button workspace-csv-button disabled" for="mapping-csv-input"><span aria-hidden="true">↑</span> Indlæs mapping-CSV<input id="mapping-csv-input" type="file" accept=".csv,text/csv" hidden disabled></label>
+            <button id="mapping-csv-download" class="secondary-button workspace-csv-button" type="button" disabled><span aria-hidden="true">↓</span> Download mapping-CSV</button>
             <span id="mapping-summary" class="mapping-summary"></span>
           </div>
           <p id="mapping-error" class="form-error hidden"></p>
+          <p id="mapping-csv-status" class="workspace-csv-status hidden" aria-live="polite"></p>
           <div id="mapping-table" class="table-wrap hidden">
             <table class="mapping-table">
               <thead><tr><th>Nuværende Fabric-bruger</th><th>Ny bruger uden Fabric-adgang</th><th>Status</th></tr></thead>

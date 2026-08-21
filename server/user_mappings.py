@@ -248,6 +248,40 @@ def set_user_mapping(
         raise ValueError("Target user is already mapped to another source user.") from error
 
 
+def apply_user_mappings(
+    tenant_id: str,
+    assignments: list[tuple[str, str | None]],
+    snapshot: sqlite3.Connection,
+    database_path: Path = DEFAULT_MAPPING_DATABASE,
+) -> None:
+    view = mapping_view(tenant_id, snapshot, database_path)
+    source_ids = {user["id"] for user in view["sourceUsers"]}
+    target_ids = {user["id"] for user in view["targetUsers"]}
+    requested_sources = [source_id for source_id, _ in assignments]
+    requested_targets = [target_id for _, target_id in assignments if target_id]
+    if len(requested_sources) != len(set(requested_sources)):
+        raise ValueError("Each source user can only appear once.")
+    if len(requested_targets) != len(set(requested_targets)):
+        raise ValueError("Each target user can only appear once.")
+    if any(source_id not in source_ids for source_id in requested_sources):
+        raise ValueError("Source user is not a tenant user with Fabric presence.")
+    if any(target_id not in target_ids for target_id in requested_targets):
+        raise ValueError("Target user is not a tenant user without Fabric presence.")
+    try:
+        with closing(connect_mapping_database(database_path)) as connection:
+            connection.executemany(
+                "DELETE FROM user_mappings WHERE tenant_id = ? AND source_user_id = ?",
+                [(tenant_id, source_id) for source_id in requested_sources],
+            )
+            connection.executemany(
+                "INSERT INTO user_mappings(tenant_id, source_user_id, target_user_id) VALUES (?, ?, ?)",
+                [(tenant_id, source_id, target_id) for source_id, target_id in assignments if target_id],
+            )
+            connection.commit()
+    except sqlite3.IntegrityError as error:
+        raise ValueError("Target user is already mapped to another source user.") from error
+
+
 def delete_user_mapping(tenant_id: str, source_user_id: str, database_path: Path = DEFAULT_MAPPING_DATABASE) -> None:
     with closing(connect_mapping_database(database_path)) as connection:
         connection.execute("DELETE FROM user_mappings WHERE tenant_id = ? AND source_user_id = ?", (tenant_id, source_user_id))
