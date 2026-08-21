@@ -11,7 +11,7 @@ from typing import Annotated, Any
 from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, SecretStr
 
 from .azure_auth import azure_auth_manager
 from .database import DEFAULT_DATABASE, ROOT, connect
@@ -48,13 +48,21 @@ def get_database() -> Generator[sqlite3.Connection, None, None]:
 
 
 Database = Annotated[sqlite3.Connection, Depends(get_database)]
+WorkspaceId = Annotated[str, Field(pattern=r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")]
 
 
 class ScanRequest(BaseModel):
     tenant_id: str = Field(alias="tenantId", min_length=3, max_length=100, pattern=r"^[0-9a-fA-F-]+$")
     workspace_limit: int = Field(default=0, alias="workspaceLimit", ge=0, le=100000)
+    workspace_ids: list[WorkspaceId] | None = Field(default=None, alias="workspaceIds", max_length=100000)
     include_personal_workspaces: bool = Field(default=False, alias="includePersonalWorkspaces")
     include_power_bi_artifact_users: bool = Field(default=True, alias="includePowerBIArtifactUsers")
+
+
+class ServicePrincipalLoginRequest(BaseModel):
+    tenant_id: str = Field(alias="tenantId", pattern=r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
+    client_id: str = Field(alias="clientId", pattern=r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
+    client_secret: SecretStr = Field(alias="clientSecret", min_length=1, max_length=4096)
 
 
 class UserMappingRequest(BaseModel):
@@ -82,6 +90,18 @@ def start_login() -> dict[str, Any]:
         raise HTTPException(status_code=409, detail=str(error)) from error
 
 
+@app.post("/api/auth/service-principal", dependencies=[Depends(require_api_token)])
+def service_principal_login(request: ServicePrincipalLoginRequest) -> dict[str, Any]:
+    try:
+        return azure_auth_manager.login_service_principal(
+            request.tenant_id,
+            request.client_id,
+            request.client_secret.get_secret_value(),
+        )
+    except RuntimeError as error:
+        raise HTTPException(status_code=401, detail=str(error)) from error
+
+
 @app.delete("/api/auth/current", dependencies=[Depends(require_api_token)])
 def logout() -> dict[str, Any]:
     try:
@@ -95,6 +115,17 @@ def current_scan() -> dict[str, Any]:
     return scan_manager.status()
 
 
+@app.get("/api/scans/inventory")
+def scan_inventory(
+    tenant_id: Annotated[str, Query(alias="tenantId", min_length=3, max_length=100, pattern=r"^[0-9a-fA-F-]+$")],
+    include_personal: Annotated[bool, Query(alias="includePersonalWorkspaces")] = False,
+) -> dict[str, Any]:
+    try:
+        return azure_auth_manager.scan_inventory(tenant_id, include_personal)
+    except RuntimeError as error:
+        raise HTTPException(status_code=409, detail=str(error)) from error
+
+
 @app.post("/api/scans", status_code=202, dependencies=[Depends(require_api_token)])
 def start_scan(request: ScanRequest) -> dict[str, Any]:
     if permission_migration_manager.status()["status"] in ACTIVE_STATUSES:
@@ -105,6 +136,7 @@ def start_scan(request: ScanRequest) -> dict[str, Any]:
             request.workspace_limit,
             request.include_personal_workspaces,
             request.include_power_bi_artifact_users,
+            request.workspace_ids,
         )
     except RuntimeError as error:
         raise HTTPException(status_code=409, detail=str(error)) from error

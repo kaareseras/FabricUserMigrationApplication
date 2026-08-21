@@ -133,11 +133,15 @@ Object.assign(translations.pt, {
 });
 Object.assign(translations.da, {
   "The available Microsoft write APIs cannot reproduce this item type and access right exactly.": "De tilgængelige Microsoft-skrive-API'er kan ikke genskabe denne item-type og rettighed præcist.",
-  "This workspace role is not supported by the Fabric role-assignment API.": "Denne workspace-rolle understøttes ikke af Fabrics API til rolletildeling."
+  "This workspace role is not supported by the Fabric role-assignment API.": "Denne workspace-rolle understøttes ikke af Fabrics API til rolletildeling.",
+  Authentication: "Godkendelse", "AZURE AUTHENTICATION": "AZURE-GODKENDELSE", "Connect to Microsoft Fabric": "Opret forbindelse til Microsoft Fabric", "Choose delegated Microsoft sign-in for interactive use or a service principal for unattended operation.": "Vælg delegeret Microsoft-login til interaktiv brug eller en service principal til automatiseret drift.",
+  DELEGATED: "DELEGERET", "Microsoft account": "Microsoft-konto", "Current session": "Aktuel session", AUTOMATION: "AUTOMATISERING", "Service principal": "Service principal", "Tenant ID": "Tenant-ID", "Client ID": "Klient-ID", "Client secret": "Klienthemmelighed", "Client secret value": "Værdi for klienthemmelighed", "The secret is used only for this Azure CLI login and is not stored by the application.": "Hemmeligheden bruges kun til dette Azure CLI-login og gemmes ikke af applikationen.", "Sign in with service principal": "Log ind med service principal", "Application API token": "Applikationens API-token", "Required for sign-in and other changes when FABRIC_ATLAS_TOKEN is configured.": "Kræves til login og andre ændringer, når FABRIC_ATLAS_TOKEN er konfigureret.", "Not signed in": "Ikke logget ind"
 });
 Object.assign(translations.pt, {
   "The available Microsoft write APIs cannot reproduce this item type and access right exactly.": "As APIs de escrita disponíveis da Microsoft não conseguem reproduzir exatamente este tipo de item e direito de acesso.",
-  "This workspace role is not supported by the Fabric role-assignment API.": "Esta função do espaço de trabalho não é suportada pela API de atribuição de funções do Fabric."
+  "This workspace role is not supported by the Fabric role-assignment API.": "Esta função do espaço de trabalho não é suportada pela API de atribuição de funções do Fabric.",
+  Authentication: "Autenticação", "AZURE AUTHENTICATION": "AUTENTICAÇÃO DO AZURE", "Connect to Microsoft Fabric": "Ligar ao Microsoft Fabric", "Choose delegated Microsoft sign-in for interactive use or a service principal for unattended operation.": "Escolha o início de sessão Microsoft delegado para utilização interativa ou um principal de serviço para operação automática.",
+  DELEGATED: "DELEGADO", "Microsoft account": "Conta Microsoft", "Current session": "Sessão atual", AUTOMATION: "AUTOMAÇÃO", "Service principal": "Principal de serviço", "Tenant ID": "ID do tenant", "Client ID": "ID do cliente", "Client secret": "Segredo do cliente", "Client secret value": "Valor do segredo do cliente", "The secret is used only for this Azure CLI login and is not stored by the application.": "O segredo é usado apenas neste início de sessão da CLI do Azure e não é armazenado pela aplicação.", "Sign in with service principal": "Iniciar sessão com principal de serviço", "Application API token": "Token da API da aplicação", "Required for sign-in and other changes when FABRIC_ATLAS_TOKEN is configured.": "Necessário para iniciar sessão e fazer outras alterações quando FABRIC_ATLAS_TOKEN está configurado.", "Not signed in": "Sessão não iniciada"
 });
 Object.assign(translations.en, {
   "API-token": "API token",
@@ -145,6 +149,9 @@ Object.assign(translations.en, {
   "Gem": "Save",
   "Gemmes kun i denne browser og bruges, når serveren kræver et token.": "Stored only in this browser; used when the server requires a token.",
   "API-token mangler eller er ugyldig": "Missing or invalid API token"
+  , "Kapaciteter og workspaces": "Capacities and workspaces", "Vælg en tenant for at hente workspaces.": "Select a tenant to load workspaces.", "Vælg en kapacitet for at vælge eller fravælge alle dens workspaces.": "Select a capacity to select or clear all of its workspaces.",
+  "{count} valgt": "{count} selected", "Henter kapaciteter og workspaces...": "Loading capacities and workspaces...", "Ingen kapaciteter eller workspaces blev fundet.": "No capacities or workspaces were found.", "Ingen workspaces": "No workspaces", "Vælg alle workspaces i {capacity}": "Select all workspaces in {capacity}", "Vælg mindst ét workspace": "Select at least one workspace", "Baseret på {count} valgte workspaces": "Based on {count} selected workspaces",
+  "SCAN SELECTION": "SCAN SELECTION", "SENESTE SNAPSHOT": "LATEST SNAPSHOT", "Workspace-detaljer": "Workspace details", "Gå til scan": "Go to scan", "{count} workspaces valgt": "{count} workspaces selected", "Administrer valget under Workspaces.": "Manage the selection under Workspaces.", "Vælg workspaces": "Select workspaces"
 });
 Object.assign(translations.pt, {
   "API-token": "Token da API",
@@ -152,6 +159,9 @@ Object.assign(translations.pt, {
   "Gem": "Guardar",
   "Gemmes kun i denne browser og bruges, når serveren kræver et token.": "Guardado apenas neste navegador; usado quando o servidor exige um token.",
   "API-token mangler eller er ugyldig": "Token da API em falta ou inválido"
+  , "Kapaciteter og workspaces": "Capacidades e espaços de trabalho", "Vælg en tenant for at hente workspaces.": "Selecione um tenant para carregar os espaços de trabalho.", "Vælg en kapacitet for at vælge eller fravælge alle dens workspaces.": "Selecione uma capacidade para selecionar ou desmarcar todos os seus espaços de trabalho.",
+  "{count} valgt": "{count} selecionados", "Henter kapaciteter og workspaces...": "A carregar capacidades e espaços de trabalho...", "Ingen kapaciteter eller workspaces blev fundet.": "Não foram encontradas capacidades ou espaços de trabalho.", "Ingen workspaces": "Sem espaços de trabalho", "Vælg alle workspaces i {capacity}": "Selecionar todos os espaços de trabalho em {capacity}", "Vælg mindst ét workspace": "Selecione pelo menos um espaço de trabalho", "Baseret på {count} valgte workspaces": "Com base em {count} espaços de trabalho selecionados",
+  "SCAN SELECTION": "SELEÇÃO DA ANÁLISE", "SENESTE SNAPSHOT": "SNAPSHOT MAIS RECENTE", "Workspace-detaljer": "Detalhes dos espaços de trabalho", "Gå til scan": "Ir para análise", "{count} workspaces valgt": "{count} espaços de trabalho selecionados", "Administrer valget under Workspaces.": "Gira a seleção em Espaços de trabalho.", "Vælg workspaces": "Selecionar espaços de trabalho"
 });
 
 function detectLanguage() {
@@ -183,6 +193,9 @@ const state = {
   workspaceRequest: null,
   auth: null,
   authTimer: null,
+  scanInventory: null,
+  scanInventoryTenant: null,
+  scanInventoryLoading: false,
   scan: null,
   scanTimer: null,
   scanWasActive: false
@@ -294,27 +307,100 @@ function renderScanEstimate() {
   const actualEstimate = active
     ? state.scan?.estimate || (stageWorkspaceCount ? calculateScanEstimate(stageWorkspaceCount, byId("scan-artifacts").checked) : null)
     : null;
-  const configuredLimit = Math.max(0, Number(byId("scan-limit").value) || 0);
-  const workspaceCount = actualEstimate?.workspaceCount ?? (configuredLimit || state.summary?.counts.workspaces || 0);
+  const selectedCount = selectedWorkspaceIds().length;
+  const workspaceCount = actualEstimate?.workspaceCount ?? selectedCount;
   const estimate = actualEstimate || calculateScanEstimate(workspaceCount, byId("scan-artifacts").checked);
   const count = workspaceCount.toLocaleString(localeName());
   const basis = actualEstimate
     ? t("Baseret på {count} workspaces fundet i tenant", { count })
-    : configuredLimit
-      ? t("Baseret på en grænse på op til {count} workspaces", { count })
-      : t("Baseret på {count} workspaces i seneste snapshot", { count });
-  const personalNote = !actualEstimate && byId("scan-personal").checked ? ` ${t("Personlige workspaces kan øge det faktiske antal.")}` : "";
+    : t("Baseret på {count} valgte workspaces", { count });
   const pacing = formatDuration(estimate.accessPacingSeconds);
 
   byId("scan-estimate-duration").textContent = t("Ca. {minimum}–{maximum}", {
     minimum: formatDuration(estimate.minimumSeconds),
     maximum: formatDuration(estimate.maximumSeconds)
   });
-  byId("scan-estimate-basis").textContent = `${basis}.${personalNote}`;
+  byId("scan-estimate-basis").textContent = `${basis}.`;
   const metadataBatchKey = estimate.metadataBatches === 1 ? "API-pacing: {duration} · {batches} metadata-batch" : "API-pacing: {duration} · {batches} metadata-batches";
   byId("scan-estimate-breakdown").textContent = `${estimate.metadataBatches
     ? t(metadataBatchKey, { duration: pacing, batches: estimate.metadataBatches.toLocaleString(localeName()) })
     : t("API-pacing: {duration} · uden metadata-scan", { duration: pacing })}. ${t("Retries og Microsoft-behandlingstid kan forlænge scanningen.")}`;
+}
+
+function selectedWorkspaceIds() {
+  return [...document.querySelectorAll("#scan-workspace-tree input[data-workspace-id]:checked")].map((input) => input.dataset.workspaceId);
+}
+
+function updateCapacityCheckboxes() {
+  document.querySelectorAll("#scan-workspace-tree input[data-capacity-id]").forEach((capacityInput) => {
+    const children = [...document.querySelectorAll(`#scan-workspace-tree input[data-parent-capacity="${capacityInput.dataset.capacityId}"]`)];
+    const selected = children.filter((input) => input.checked).length;
+    capacityInput.checked = children.length > 0 && selected === children.length;
+    capacityInput.indeterminate = selected > 0 && selected < children.length;
+  });
+  const selectedCount = selectedWorkspaceIds().length;
+  byId("scan-selection-count").textContent = t("{count} valgt", { count: selectedCount.toLocaleString(localeName()) });
+  byId("scan-selection-summary").textContent = t("{count} workspaces valgt", { count: selectedCount.toLocaleString(localeName()) });
+  renderScanEstimate();
+  renderScan();
+}
+
+function renderScanInventory() {
+  const tree = byId("scan-workspace-tree");
+  if (state.scanInventoryLoading) {
+    tree.innerHTML = `<p class="workspace-tree-message">${t("Henter kapaciteter og workspaces...")}</p>`;
+    return;
+  }
+  if (!state.scanInventory) {
+    tree.innerHTML = `<p class="workspace-tree-message">${t("Vælg en tenant for at hente workspaces.")}</p>`;
+    byId("scan-selection-count").textContent = t("{count} valgt", { count: "0" });
+    return;
+  }
+  if (!state.scanInventory.capacities.length) {
+    tree.innerHTML = `<p class="workspace-tree-message">${t("Ingen kapaciteter eller workspaces blev fundet.")}</p>`;
+    return;
+  }
+  tree.innerHTML = state.scanInventory.capacities.map((capacity) => `
+    <details class="capacity-node" open>
+      <summary class="capacity-row">
+        <input type="checkbox" data-capacity-id="${escapeHtml(capacity.id)}" aria-label="${escapeHtml(t("Vælg alle workspaces i {capacity}", { capacity: capacity.name }))}" ${capacity.workspaces.length ? "" : "disabled"}>
+        <span class="capacity-name"><strong>${escapeHtml(capacity.name)}</strong><small>${escapeHtml([capacity.sku, capacity.state].filter(Boolean).join(" · "))}</small></span>
+        <span class="capacity-count">${capacity.workspaces.length.toLocaleString(localeName())}</span>
+      </summary>
+      <div class="workspace-children">
+        ${capacity.workspaces.length ? capacity.workspaces.map((workspace) => `
+          <label class="workspace-tree-row">
+            <input type="checkbox" data-workspace-id="${escapeHtml(workspace.id)}" data-parent-capacity="${escapeHtml(capacity.id)}">
+            <span><strong>${escapeHtml(workspace.name)}</strong><small>${escapeHtml(workspace.type)}</small></span>
+          </label>`).join("") : `<p class="workspace-tree-empty">${t("Ingen workspaces")}</p>`}
+      </div>
+    </details>`).join("");
+  updateCapacityCheckboxes();
+}
+
+async function loadScanInventory() {
+  const tenantId = byId("scan-tenant").value.trim();
+  state.scanInventory = null;
+  state.scanInventoryTenant = null;
+  if (!tenantId) {
+    renderScanInventory();
+    renderScan();
+    return;
+  }
+  state.scanInventoryLoading = true;
+  renderScanInventory();
+  try {
+    const includePersonal = byId("scan-personal").checked;
+    state.scanInventory = await api(`/scans/inventory?tenantId=${encodeURIComponent(tenantId)}&includePersonalWorkspaces=${includePersonal}`);
+    state.scanInventoryTenant = tenantId;
+  } catch (error) {
+    byId("scan-form-error").textContent = error.message;
+    byId("scan-form-error").classList.remove("hidden");
+  } finally {
+    state.scanInventoryLoading = false;
+    renderScanInventory();
+    renderScan();
+  }
 }
 
 function renderOverview() {
@@ -414,7 +500,7 @@ function renderWorkspaces() {
     <button class="workspace-card" data-workspace-id="${escapeHtml(workspace.id)}"><div class="workspace-card-head"><div><h3>${escapeHtml(workspace.name)}</h3><span class="status">${escapeHtml(workspace.state || "Active")}</span></div><p>${escapeHtml(workspace.id)}</p></div>
     <div class="workspace-card-stats"><div><span>${t("Items")}</span><strong>${workspace.artifacts.toLocaleString(localeName())}</strong></div><div><span>${t("Principals")}</span><strong>${workspace.principals.toLocaleString(localeName())}</strong></div><div><span>${t("Roller")}</span><strong>${workspace.roles.toLocaleString(localeName())}</strong></div></div></button>
   `).join("");
-  document.querySelectorAll("[data-workspace-id]").forEach((button) => button.addEventListener("click", () => openWorkspace(button.dataset.workspaceId)));
+  document.querySelectorAll("#workspace-grid [data-workspace-id]").forEach((button) => button.addEventListener("click", () => openWorkspace(button.dataset.workspaceId)));
   renderPagination("workspaces-pagination", state.workspaces, (page) => { state.workspaces.page = page; loadWorkspaces(); });
 }
 
@@ -712,8 +798,9 @@ function renderScan() {
   byId("scan-log").textContent = scan.logs?.length ? scan.logs.join("\n") : t("Ingen aktivitet endnu.");
   const authenticated = state.auth?.status === "authenticated";
   const tenantSelected = Boolean(byId("scan-tenant").value);
-  byId("scan-start").disabled = active || !authenticated || !tenantSelected;
-  byId("scan-start").textContent = t(active ? "Scan kører..." : !authenticated ? "Log ind for at scanne" : tenantSelected ? "Start scan" : "Vælg en tenant");
+  const hasWorkspaceSelection = selectedWorkspaceIds().length > 0;
+  byId("scan-start").disabled = active || !authenticated || !tenantSelected || !hasWorkspaceSelection;
+  byId("scan-start").textContent = t(active ? "Scan kører..." : !authenticated ? "Log ind for at scanne" : !tenantSelected ? "Vælg en tenant" : hasWorkspaceSelection ? "Start scan" : "Vælg mindst ét workspace");
   byId("scan-result").classList.toggle("hidden", !scan.result);
   byId("scan-result").innerHTML = scan.result ? Object.entries(scan.result).map(([key, value]) => `<div><strong>${Number(value).toLocaleString(localeName())}</strong><span>${escapeHtml(t(key))}</span></div>`).join("") : "";
   byId("scan-log").scrollTop = byId("scan-log").scrollHeight;
@@ -730,7 +817,9 @@ function renderAuth() {
   byId("auth-status").dataset.status = auth.status;
   byId("auth-stage").textContent = t(auth.stage);
   byId("auth-account").classList.toggle("hidden", !authenticated);
-  byId("auth-account").textContent = authenticated ? `${auth.account.user} · ${auth.account.name}` : "";
+  const authType = auth.account?.authType === "servicePrincipal" ? t("Service principal") : t("Microsoft account");
+  byId("auth-account").textContent = authenticated ? `${authType} · ${auth.account.user} · ${auth.account.name}` : "";
+  byId("scan-auth-summary").textContent = authenticated ? `${authType} · ${auth.account.user}` : t("Ikke logget ind");
   const deviceLogin = waiting && Boolean(auth.userCode);
   byId("auth-device").classList.toggle("hidden", !deviceLogin);
   byId("auth-device").querySelector("span").textContent = t("Åbn Microsoft-login og indtast koden");
@@ -754,6 +843,7 @@ function renderAuth() {
   byId("auth-login").disabled = waiting || auth.status === "unavailable";
   byId("auth-login").textContent = t(waiting ? "Afventer Microsoft..." : auth.status === "unavailable" ? "Kræver container-rebuild" : authenticated ? "Skift konto" : "Log ind med Microsoft");
   byId("auth-logout").classList.toggle("hidden", !authenticated);
+  byId("sp-login").disabled = waiting || auth.status === "unavailable";
   renderScan();
   renderUserMappings();
 }
@@ -764,6 +854,7 @@ async function pollAuth() {
     state.auth = await api("/auth/current");
     renderAuth();
     if (state.auth.status === "waiting") state.authTimer = setTimeout(pollAuth, 1000);
+    else if (state.auth.status === "authenticated" && byId("scan-tenant").value && state.scanInventoryTenant !== byId("scan-tenant").value) await loadScanInventory();
   } catch (authError) {
     byId("auth-error").textContent = authError.message;
     byId("auth-error").classList.remove("hidden");
@@ -783,12 +874,41 @@ async function startLogin() {
   }
 }
 
+async function loginServicePrincipal(event) {
+  event.preventDefault();
+  const error = byId("auth-error");
+  const secretInput = byId("sp-client-secret");
+  error.classList.add("hidden");
+  byId("sp-login").disabled = true;
+  try {
+    state.auth = await api("/auth/service-principal", {
+      method: "POST",
+      body: {
+        tenantId: byId("sp-tenant-id").value.trim(),
+        clientId: byId("sp-client-id").value.trim(),
+        clientSecret: secretInput.value
+      }
+    });
+    renderAuth();
+    if (byId("scan-tenant").value) await loadScanInventory();
+  } catch (authError) {
+    error.textContent = authError.message;
+    error.classList.remove("hidden");
+  } finally {
+    secretInput.value = "";
+    byId("sp-login").disabled = false;
+  }
+}
+
 async function logout() {
   const error = byId("auth-error");
   error.classList.add("hidden");
   try {
     state.auth = await api("/auth/current", { method: "DELETE" });
+    state.scanInventory = null;
+    state.scanInventoryTenant = null;
     renderAuth();
+    renderScanInventory();
   } catch (authError) {
     error.textContent = authError.message;
     error.classList.remove("hidden");
@@ -816,12 +936,19 @@ async function startScan(event) {
   event.preventDefault();
   const error = byId("scan-form-error");
   error.classList.add("hidden");
+  const workspaceIds = selectedWorkspaceIds();
+  if (!workspaceIds.length) {
+    error.textContent = t("Vælg mindst ét workspace");
+    error.classList.remove("hidden");
+    return;
+  }
   try {
     state.scan = await api("/scans", {
       method: "POST",
       body: {
         tenantId: byId("scan-tenant").value.trim(),
-        workspaceLimit: Number(byId("scan-limit").value),
+        workspaceLimit: 0,
+        workspaceIds,
         includePersonalWorkspaces: byId("scan-personal").checked,
         includePowerBIArtifactUsers: byId("scan-artifacts").checked
       }
@@ -849,7 +976,7 @@ function exportPage() {
 }
 
 function switchView(view) {
-  const titles = { overview: "Adgangsoverblik", permissions: "Rettigheder", workspaces: "Workspaces", mappings: "Brugermapping for migration", coverage: "API-dækning", scan: "Start discovery-scan" };
+  const titles = { overview: "Adgangsoverblik", permissions: "Rettigheder", workspaces: "Workspaces", mappings: "Brugermapping for migration", coverage: "API-dækning", auth: "Authentication", scan: "Start discovery-scan" };
   state.activeView = view;
   document.querySelectorAll(".nav-item").forEach((item) => item.classList.toggle("active", item.dataset.view === view));
   document.querySelectorAll(".view").forEach((item) => item.classList.toggle("active-view", item.id === `${view}-view`));
@@ -875,16 +1002,26 @@ function bindEvents() {
   byId("theme-toggle").addEventListener("click", () => document.documentElement.setAttribute("data-theme", document.documentElement.dataset.theme === "dark" ? "light" : "dark"));
   byId("auth-login").addEventListener("click", startLogin);
   byId("auth-logout").addEventListener("click", logout);
+  byId("service-principal-form").addEventListener("submit", loginServicePrincipal);
   byId("api-token-save").addEventListener("click", saveApiToken);
   byId("api-token").addEventListener("keydown", (event) => {
     if (event.key !== "Enter") return;
     event.preventDefault();
     saveApiToken();
   });
-  byId("scan-tenant").addEventListener("change", renderScan);
-  byId("scan-limit").addEventListener("input", renderScanEstimate);
+  byId("scan-tenant").addEventListener("change", loadScanInventory);
   byId("scan-artifacts").addEventListener("change", renderScanEstimate);
-  byId("scan-personal").addEventListener("change", renderScanEstimate);
+  byId("scan-personal").addEventListener("change", loadScanInventory);
+  byId("scan-workspace-tree").addEventListener("click", (event) => {
+    if (event.target.matches("input[data-capacity-id]")) event.stopPropagation();
+  });
+  byId("scan-workspace-tree").addEventListener("change", (event) => {
+    const input = event.target;
+    if (input.matches("input[data-capacity-id]")) {
+      document.querySelectorAll(`#scan-workspace-tree input[data-parent-capacity="${input.dataset.capacityId}"]`).forEach((child) => { child.checked = input.checked; });
+    }
+    if (input.matches("input[data-capacity-id], input[data-workspace-id]")) updateCapacityCheckboxes();
+  });
   byId("scan-form").addEventListener("submit", startScan);
   byId("mapping-tenant").addEventListener("change", () => { invalidateMigrationPlan(); loadUserMappings(); });
   byId("mapping-sync").addEventListener("click", syncDirectoryUsers);

@@ -43,6 +43,31 @@ def test_scan_manager_tracks_progress_and_imports(monkeypatch) -> None:
     assert "Found workspace" in status["logs"]
 
 
+def test_scan_manager_passes_selected_workspace_ids_as_json(monkeypatch) -> None:
+    thread_arguments = []
+
+    class FakeThread:
+        def __init__(self, target, args, daemon):
+            thread_arguments.append(args)
+
+        @staticmethod
+        def start() -> None:
+            pass
+
+    workspace_ids = [
+        "11111111-1111-1111-1111-111111111111",
+        "22222222-2222-2222-2222-222222222222",
+    ]
+    monkeypatch.setattr(scan_jobs.shutil, "which", lambda name: sys.executable)
+    monkeypatch.setattr(scan_jobs.threading, "Thread", FakeThread)
+
+    scan_jobs.ScanManager().start("00000000-0000-0000-0000-000000000000", 0, False, True, workspace_ids)
+
+    command = thread_arguments[0][0]
+    json_index = command.index("-WorkspaceIdsJson") + 1
+    assert scan_jobs.json.loads(command[json_index]) == workspace_ids
+
+
 def test_scan_manager_tracks_and_clears_workspace_progress() -> None:
     manager = scan_jobs.ScanManager()
     manager._job = {"status": "running", "logs": [], "workspaceProgress": None}

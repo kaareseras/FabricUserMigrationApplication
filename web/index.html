@@ -28,6 +28,7 @@
         <button class="nav-item" data-view="workspaces"><span class="nav-icon">▦</span>Workspaces</button>
         <button class="nav-item" data-view="mappings"><span class="nav-icon">⇄</span>Brugermapping</button>
         <button class="nav-item" data-view="coverage"><span class="nav-icon">✓</span>API-dækning</button>
+        <button class="nav-item" data-view="auth"><span class="nav-icon">⚿</span>Authentication</button>
         <button class="nav-item" data-view="scan"><span class="nav-icon">↻</span>Start scan</button>
       </nav>
 
@@ -116,6 +117,31 @@
         </section>
 
         <section id="workspaces-view" class="view">
+          <section class="panel workspace-selection-panel">
+            <div class="panel-heading">
+              <div><p class="eyebrow">SCAN SELECTION</p><h2>Kapaciteter og workspaces</h2></div>
+              <span id="scan-selection-count" class="status-chip">0 valgt</span>
+            </div>
+            <div class="workspace-selection-controls">
+              <div>
+                <label class="field-label" for="scan-tenant">Tenant</label>
+                <select id="scan-tenant" name="tenantId" required disabled>
+                  <option value="">Log ind for at hente tenants</option>
+                </select>
+                <span id="tenant-hint" class="field-hint">Listen viser de tenants, Microsoft-kontoen har adgang til.</span>
+              </div>
+              <label class="check-row"><input id="scan-personal" type="checkbox"><span><strong>Personlige workspaces</strong><small>Medtag My Workspaces i discovery</small></span></label>
+            </div>
+            <div id="scan-workspace-tree" class="workspace-tree" aria-live="polite">
+              <p class="workspace-tree-message">Vælg en tenant for at hente workspaces.</p>
+            </div>
+            <div class="workspace-selection-footer">
+              <span class="field-hint">Vælg en kapacitet for at vælge eller fravælge alle dens workspaces.</span>
+              <button class="secondary-button" type="button" data-go="scan">Gå til scan</button>
+            </div>
+          </section>
+
+          <div class="workspace-snapshot-heading"><div><p class="eyebrow">SENESTE SNAPSHOT</p><h2>Workspace-detaljer</h2></div></div>
           <div class="toolbar compact-toolbar">
             <label class="search-field"><span>⌕</span><input id="workspace-search" type="search" placeholder="Søg workspace..."></label>
             <div class="view-switch" role="group" aria-label="Visning"><button class="active" data-layout="grid">▦</button><button data-layout="list">≡</button></div>
@@ -196,42 +222,58 @@
           <section class="panel api-notes"><div class="panel-heading"><div><p class="eyebrow">DRIFTSNOTER</p><h2>API-begrænsninger</h2></div></div><ul id="api-notes-list"></ul></section>
         </section>
 
+        <section id="auth-view" class="view">
+          <div class="auth-view-intro"><p class="eyebrow">AZURE AUTHENTICATION</p><h2>Connect to Microsoft Fabric</h2><p>Choose delegated Microsoft sign-in for interactive use or a service principal for unattended operation.</p></div>
+          <div class="auth-layout" aria-live="polite">
+            <section class="panel auth-method-panel">
+              <div class="panel-heading"><div><p class="eyebrow">DELEGATED</p><h2>Microsoft account</h2></div><span id="auth-status" class="status-chip">Kontrollerer</span></div>
+              <div class="auth-heading"><div><strong>Current session</strong><span id="auth-stage">Kontrollerer login...</span></div></div>
+              <p id="auth-account" class="auth-account hidden"></p>
+              <div id="auth-device" class="auth-device hidden">
+                <span>Åbn Microsoft-login og indtast koden</span>
+                <code id="auth-device-code"></code>
+                <a id="auth-device-link" href="https://microsoft.com/devicelogin" target="_blank" rel="noopener">Åbn Microsoft-login</a>
+              </div>
+              <div class="auth-actions">
+                <button id="auth-login" class="secondary-button" type="button">Log ind med Microsoft</button>
+                <button id="auth-logout" class="secondary-button hidden" type="button">Log ud</button>
+              </div>
+            </section>
+
+            <form id="service-principal-form" class="panel auth-method-panel">
+              <div class="panel-heading"><div><p class="eyebrow">AUTOMATION</p><h2>Service principal</h2></div></div>
+              <label class="field-label" for="sp-tenant-id">Tenant ID</label>
+              <input id="sp-tenant-id" class="text-input" type="text" required autocomplete="off" placeholder="00000000-0000-0000-0000-000000000000">
+              <label class="field-label" for="sp-client-id">Client ID</label>
+              <input id="sp-client-id" class="text-input" type="text" required autocomplete="off" placeholder="00000000-0000-0000-0000-000000000000">
+              <label class="field-label" for="sp-client-secret">Client secret</label>
+              <input id="sp-client-secret" class="text-input" type="password" required autocomplete="new-password" placeholder="Client secret value">
+              <span class="field-hint">The secret is used only for this Azure CLI login and is not stored by the application.</span>
+              <button id="sp-login" class="primary-button" type="submit">Sign in with service principal</button>
+            </form>
+
+            <section class="panel auth-token-panel">
+              <div><strong>Application API token</strong><span>Required for sign-in and other changes when FABRIC_ATLAS_TOKEN is configured.</span></div>
+              <div class="auth-token-row">
+                <input id="api-token" class="text-input" type="password" autocomplete="off" placeholder="Indtast token (FABRIC_ATLAS_TOKEN)">
+                <button id="api-token-save" class="secondary-button" type="button">Gem</button>
+              </div>
+              <span class="field-hint">Gemmes kun i denne browser og bruges, når serveren kræver et token.</span>
+            </section>
+          </div>
+          <p id="auth-error" class="form-error hidden"></p>
+        </section>
+
         <section id="scan-view" class="view">
           <div class="scan-layout">
             <form id="scan-form" class="panel scan-form">
               <div class="panel-heading"><div><p class="eyebrow">TENANT DISCOVERY</p><h2>Nyt rettighedsscan</h2></div><span id="scan-availability" class="status-chip">Klar</span></div>
-              <section class="auth-section" aria-live="polite">
-                <div class="auth-heading"><div><strong>Microsoft-konto</strong><span id="auth-stage">Kontrollerer login...</span></div><span id="auth-status" class="status-chip">Kontrollerer</span></div>
-                <p id="auth-account" class="auth-account hidden"></p>
-                <div id="auth-device" class="auth-device hidden">
-                  <span>Åbn Microsoft-login og indtast koden</span>
-                  <code id="auth-device-code"></code>
-                  <a id="auth-device-link" href="https://microsoft.com/devicelogin" target="_blank" rel="noopener">Åbn Microsoft-login</a>
-                </div>
-                <div class="auth-actions">
-                  <button id="auth-login" class="secondary-button" type="button">Log ind med Microsoft</button>
-                  <button id="auth-logout" class="secondary-button hidden" type="button">Log ud</button>
-                </div>
-                <div class="auth-token">
-                  <label class="field-label" for="api-token">API-token</label>
-                  <div class="auth-token-row">
-                    <input id="api-token" class="text-input" type="password" autocomplete="off" placeholder="Indtast token (FABRIC_ATLAS_TOKEN)">
-                    <button id="api-token-save" class="secondary-button" type="button">Gem</button>
-                  </div>
-                  <span class="field-hint">Gemmes kun i denne browser og bruges, når serveren kræver et token.</span>
-                </div>
-                <p id="auth-error" class="form-error hidden"></p>
-              </section>
-              <label class="field-label" for="scan-tenant">Tenant</label>
-              <select id="scan-tenant" name="tenantId" required disabled>
-                <option value="">Log ind for at hente tenants</option>
-              </select>
-              <span id="tenant-hint" class="field-hint">Listen viser de tenants, Microsoft-kontoen har adgang til.</span>
-              <label class="field-label" for="scan-limit">Maks. antal workspaces</label>
-              <input id="scan-limit" class="text-input" name="workspaceLimit" type="number" min="0" max="100000" value="0">
-              <span class="field-hint">0 scanner alle aktive workspaces.</span>
+              <div class="scan-auth-summary"><span id="scan-auth-summary">Not signed in</span><button class="text-button" type="button" data-go="auth">Authentication</button></div>
+              <div class="scan-workspace-summary">
+                <div><strong id="scan-selection-summary">0 workspaces valgt</strong><span>Administrer valget under Workspaces.</span></div>
+                <button class="secondary-button" type="button" data-go="workspaces">Vælg workspaces</button>
+              </div>
               <label class="check-row"><input id="scan-artifacts" type="checkbox" checked><span><strong>Power BI artifact-brugere</strong><small>Medtag item-adgang fra metadata-scanneren</small></span></label>
-              <label class="check-row"><input id="scan-personal" type="checkbox"><span><strong>Personlige workspaces</strong><small>Medtag My Workspaces i discovery</small></span></label>
               <div class="scan-estimate" aria-live="polite">
                 <div class="estimate-heading"><span>Estimeret scannertid</span><strong id="scan-estimate-duration">–</strong></div>
                 <span id="scan-estimate-basis"></span>

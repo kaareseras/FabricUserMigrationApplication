@@ -10,6 +10,7 @@ def test_runtime_image_packages_scan_dependencies() -> None:
     dockerfile = (ROOT / "Dockerfile").read_text(encoding="utf-8")
 
     assert "azure-cli powershell" in dockerfile
+    assert "https://packages.microsoft.com/keys/microsoft.asc" in dockerfile
     assert "python -m pip install -r requirements.txt" in dockerfile
     assert "COPY --chown=app:app scripts ./scripts" in dockerfile
     assert "AZURE_CONFIG_DIR=/app/.azure" in dockerfile

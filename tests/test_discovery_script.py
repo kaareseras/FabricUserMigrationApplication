@@ -68,6 +68,26 @@ if (@(Get-Content $checkpoint).Count -ne 3) { throw 'Expected one checkpoint per
     assert [(item["current"], item["total"]) for item in progress] == [(1, 3), (2, 3), (3, 3)]
 
 
+def test_workspace_inventory_filters_explicit_selection(tmp_path: Path) -> None:
+    run_powershell_harness(
+        tmp_path,
+        r"""
+$WorkspaceIdsJson = '["two", "three"]'
+function Invoke-ApiRequest {
+    return @{ workspaces = @(
+        [pscustomobject]@{ id = 'one'; name = 'One' },
+        [pscustomobject]@{ id = 'two'; name = 'Two' },
+        [pscustomobject]@{ id = 'three'; name = 'Three' }
+    ); continuationUri = $null }
+}
+$workspaces = @(Get-PagedFabricWorkspaces -Headers @{})
+if (($workspaces.id -join ',') -ne 'two,three') {
+    throw "Unexpected selected workspaces: $($workspaces.id -join ',')."
+}
+""",
+    )
+
+
 def test_power_bi_scans_batches_of_100_and_resumes(tmp_path: Path) -> None:
     run_powershell_harness(
         tmp_path,

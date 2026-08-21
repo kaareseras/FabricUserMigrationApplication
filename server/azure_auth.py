@@ -4,11 +4,15 @@ import re
 import shutil
 import subprocess
 import threading
+import urllib.error
+import urllib.request
 from pathlib import Path
 from typing import Any
 
 
 LOGIN_URL = "https://microsoft.com/devicelogin"
+FABRIC_RESOURCE = "https://api.fabric.microsoft.com"
+FABRIC_API = f"{FABRIC_RESOURCE}/v1"
 PROJECT_AZURE_CLI = Path(__file__).resolve().parents[1] / ".venv" / "bin" / "az"
 DEVICE_CODE_PATTERN = re.compile(r"\bcode[: ]+([A-Z0-9-]{6,})\b", re.IGNORECASE)
 
@@ -21,16 +25,15 @@ def find_azure_cli() -> str | None:
 
 
 def login_command(cli: str) -> list[str]:
-    command = [cli, "login", "--allow-no-subscriptions", "--output", "none", "--only-show-errors"]
-    if os.environ.get("AZURE_LOGIN_USE_DEVICE_CODE", "").lower() == "true":
-        command.append("--use-device-code")
-    return command
+    return [cli, "login", "--allow-no-subscriptions", "--output", "none", "--only-show-errors", "--use-device-code"]
 
 
 class AzureAuthManager:
     def __init__(self) -> None:
         self._lock = threading.Lock()
         self._state: dict[str, Any] | None = None
+        self._login_process: subprocess.Popen[str] | None = None
+        self._login_generation = 0
 
     def status(self) -> dict[str, Any]:
         with self._lock:
@@ -51,6 +54,8 @@ class AzureAuthManager:
         with self._lock:
             if self._state and self._state["status"] == "waiting":
                 raise RuntimeError("A browser login is already running.")
+            self._login_generation += 1
+            generation = self._login_generation
             self._state = {
                 "status": "waiting",
                 "stage": "Starter Microsoft-login",
@@ -61,20 +66,113 @@ class AzureAuthManager:
             }
 
         command = login_command(cli)
-        threading.Thread(target=self._run_login, args=(command,), daemon=True).start()
+        threading.Thread(target=self._run_login, args=(command, generation), daemon=True).start()
         return self.status()
+
+    def login_service_principal(self, tenant_id: str, client_id: str, client_secret: str) -> dict[str, Any]:
+        cli = find_azure_cli()
+        if cli is None:
+            raise RuntimeError("Azure CLI is not installed on the server.")
+        with self._lock:
+            if self._state and self._state["status"] == "waiting":
+                raise RuntimeError("Another login is already running.")
+            self._login_generation += 1
+            self._state = {
+                "status": "waiting",
+                "stage": "Logger ind med service principal",
+                "loginUrl": LOGIN_URL,
+                "userCode": None,
+                "account": None,
+                "tenants": [],
+                "logs": [],
+            }
+
+        command = [
+            cli,
+            "login",
+            "--service-principal",
+            "--username",
+            client_id,
+            "--password",
+            client_secret,
+            "--tenant",
+            tenant_id,
+            "--allow-no-subscriptions",
+            "--output",
+            "none",
+            "--only-show-errors",
+        ]
+        try:
+            result = subprocess.run(command, capture_output=True, text=True, timeout=60, check=False)
+            if result.returncode != 0:
+                raise RuntimeError("Service principal login failed. Verify the tenant ID, client ID, secret, and Fabric API permissions.")
+            account = self._existing_session()
+            if account["status"] != "authenticated":
+                raise RuntimeError("Azure CLI could not verify the service principal session.")
+            with self._lock:
+                self._state = account
+            return self.status()
+        except subprocess.TimeoutExpired as error:
+            with self._lock:
+                self._state = self._idle_state("failed", "Service principal-login fik timeout")
+            raise RuntimeError("Service principal login timed out.") from error
+        except RuntimeError:
+            with self._lock:
+                self._state = self._idle_state("failed", "Service principal-login fejlede")
+            raise
+        finally:
+            command[command.index("--password") + 1] = ""
 
     def logout(self) -> dict[str, Any]:
         cli = find_azure_cli()
         if cli is None:
             raise RuntimeError("Azure CLI is not installed on the server.")
         with self._lock:
-            if self._state and self._state["status"] == "waiting":
-                raise RuntimeError("Browser login is still running.")
+            self._login_generation += 1
+            login_process = self._login_process
+            self._login_process = None
+        if login_process is not None and login_process.poll() is None:
+            login_process.terminate()
         subprocess.run([cli, "logout"], capture_output=True, text=True, timeout=15, check=False)
         with self._lock:
             self._state = self._idle_state()
         return self.status()
+
+    def scan_inventory(self, tenant_id: str, include_personal: bool = False) -> dict[str, Any]:
+        cli = find_azure_cli()
+        if cli is None:
+            raise RuntimeError("Azure CLI is not installed on the server.")
+        token_result = subprocess.run(
+            [cli, "account", "get-access-token", "--tenant", tenant_id, "--resource", FABRIC_RESOURCE, "--query", "accessToken", "-o", "tsv"],
+            capture_output=True,
+            text=True,
+            timeout=30,
+            check=False,
+        )
+        token = token_result.stdout.strip()
+        if token_result.returncode != 0 or not token:
+            raise RuntimeError("Azure CLI could not acquire a Fabric access token for the selected tenant.")
+
+        capacities = self._fabric_collection(f"{FABRIC_API}/capacities", token, "value")
+        workspace_type = "" if include_personal else "&type=workspace"
+        workspaces = self._fabric_collection(f"{FABRIC_API}/admin/workspaces?state=active{workspace_type}", token, "workspaces")
+        return build_scan_inventory(capacities, workspaces)
+
+    @staticmethod
+    def _fabric_collection(url: str, token: str, property_name: str) -> list[dict[str, Any]]:
+        items: list[dict[str, Any]] = []
+        next_url: str | None = url
+        while next_url:
+            request = urllib.request.Request(next_url, headers={"Authorization": f"Bearer {token}"})
+            try:
+                with urllib.request.urlopen(request, timeout=60) as response:
+                    payload = json.load(response)
+            except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, json.JSONDecodeError) as error:
+                detail = getattr(error, "reason", None) or str(error)
+                raise RuntimeError(f"Fabric inventory request failed: {detail}") from error
+            items.extend(payload.get(property_name) or [])
+            next_url = payload.get("continuationUri")
+        return items
 
     @staticmethod
     def _idle_state(status: str = "idle", stage: str = "Ikke logget ind") -> dict[str, Any]:
@@ -158,6 +256,7 @@ class AzureAuthManager:
                 "name": account.get("name") or "Tenant uden abonnement",
                 "tenantId": account.get("tenantId") or "",
                 "user": user.get("name") or "Ukendt bruger",
+                "authType": "servicePrincipal" if user.get("type") == "servicePrincipal" else "delegated",
             },
             "tenants": tenants,
             "logs": [],
@@ -173,7 +272,7 @@ class AzureAuthManager:
             if self._state is not None:
                 self._state["logs"] = [*self._state["logs"], message][-30:]
 
-    def _run_login(self, command: list[str]) -> None:
+    def _run_login(self, command: list[str], generation: int) -> None:
         try:
             environment = os.environ.copy()
             environment["AZURE_CORE_LOGIN_EXPERIENCE_V2"] = "off"
@@ -186,8 +285,17 @@ class AzureAuthManager:
                 errors="replace",
                 env=environment,
             )
+            with self._lock:
+                if generation != self._login_generation:
+                    process.terminate()
+                    return
+                self._login_process = process
             assert process.stdout is not None
             for raw_line in process.stdout:
+                with self._lock:
+                    if generation != self._login_generation:
+                        process.terminate()
+                        return
                 line = raw_line.strip()
                 if not line:
                     continue
@@ -208,10 +316,56 @@ class AzureAuthManager:
             if account["status"] != "authenticated":
                 raise RuntimeError("Azure CLI kunne ikke bekræfte den valgte konto.")
             with self._lock:
-                self._state = account
+                if generation == self._login_generation:
+                    self._state = account
         except Exception as error:
-            self._append_log(str(error))
-            self._update(status="failed", stage="Login fejlede")
+            with self._lock:
+                if generation == self._login_generation:
+                    if self._state is not None:
+                        self._state["logs"] = [*self._state["logs"], str(error)][-30:]
+                        self._state.update(status="failed", stage="Login fejlede")
+        finally:
+            with self._lock:
+                if generation == self._login_generation:
+                    self._login_process = None
 
 
 azure_auth_manager = AzureAuthManager()
+
+
+def build_scan_inventory(capacities: list[dict[str, Any]], workspaces: list[dict[str, Any]]) -> dict[str, Any]:
+    capacity_groups = {
+        capacity["id"]: {
+            "id": capacity["id"],
+            "name": capacity.get("displayName") or capacity["id"],
+            "sku": capacity.get("sku") or "",
+            "state": capacity.get("state") or "",
+            "workspaces": [],
+        }
+        for capacity in capacities
+        if capacity.get("id")
+    }
+    unassigned_id = "unassigned"
+    for workspace in workspaces:
+        if not workspace.get("id"):
+            continue
+        capacity_id = workspace.get("capacityId") or unassigned_id
+        if capacity_id not in capacity_groups:
+            capacity_groups[capacity_id] = {
+                "id": capacity_id,
+                "name": "Unassigned capacity" if capacity_id == unassigned_id else capacity_id,
+                "sku": "",
+                "state": "",
+                "workspaces": [],
+            }
+        capacity_groups[capacity_id]["workspaces"].append({
+            "id": workspace["id"],
+            "name": workspace.get("name") or workspace["id"],
+            "type": workspace.get("type") or "",
+        })
+
+    groups = list(capacity_groups.values())
+    for capacity in groups:
+        capacity["workspaces"].sort(key=lambda workspace: workspace["name"].casefold())
+    groups.sort(key=lambda capacity: (capacity["id"] == unassigned_id, capacity["name"].casefold()))
+    return {"capacities": groups, "workspaceCount": len(workspaces)}

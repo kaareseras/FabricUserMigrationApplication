@@ -16,9 +16,9 @@ For anything beyond local use, set `FABRIC_ATLAS_TOKEN` in `.env` first (see [Se
 
 Open [http://localhost:8080](http://localhost:8080), select **Start scan**, and then:
 
-1. Select **Sign in with Microsoft**, open the Microsoft link shown by the dashboard, and enter the displayed one-time code.
+1. Open **Authentication** and sign in with either a delegated Microsoft account or a service principal. Delegated sign-in displays a device code; service-principal sign-in requires tenant ID, client ID, and client secret.
 2. Choose one of the tenants available to the signed-in account.
-3. Keep the workspace limit at `0` to scan every active workspace, or enter a smaller number for a pilot scan.
+3. Open **Workspaces**, then select capacities to include all their workspaces or select individual workspace checkboxes for a smaller pilot scan.
 4. Choose whether to include Power BI artifact users and personal workspaces.
 5. Start the scan.
 
@@ -109,6 +109,8 @@ The tenant selector lists tenants available to the signed-in Microsoft account. 
 The user mapping view also reads the selected tenant's Microsoft Entra users through Microsoft Graph. The signed-in account and Azure CLI application must have delegated permission to list users, such as `User.Read.All` or `Directory.Read.All`, with administrator consent where the tenant requires it.
 
 Applying mapped permissions requires delegated `Workspace.ReadWrite.All` for Fabric workspace roles and `Dataset.ReadWrite.All` for Power BI semantic model permissions. The caller must have enough rights in each workspace and must have `ReadReshare` on each semantic model being shared.
+
+Service-principal discovery requires the Fabric tenant setting that allows service principals to use Fabric APIs, plus the relevant Fabric administrator access and API permissions. Client secrets entered in the Authentication tab are used only for the Azure CLI login command and are not stored by the application.
 
 ## User mapping
 

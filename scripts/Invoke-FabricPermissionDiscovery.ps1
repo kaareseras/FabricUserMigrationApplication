@@ -9,6 +9,8 @@ param(
     [ValidateRange(0, 100000)]
     [int]$WorkspaceLimit = 0,
 
+    [string]$WorkspaceIdsJson = '[]',
+
     [switch]$IncludePersonalWorkspaces,
 
     [switch]$IncludePowerBIArtifactUsers
@@ -215,12 +217,25 @@ function Get-PagedFabricWorkspaces {
         $uri += "&type=$workspaceType"
     }
 
+    $selectedWorkspaceIds = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+    $parsedWorkspaceIds = ConvertFrom-Json -InputObject $WorkspaceIdsJson
+    foreach ($workspaceId in $parsedWorkspaceIds) {
+        if (-not [string]::IsNullOrWhiteSpace($workspaceId)) {
+            [void]$selectedWorkspaceIds.Add($workspaceId)
+        }
+    }
     $workspaces = [System.Collections.Generic.List[object]]::new()
     while ($uri) {
         $response = Invoke-ApiRequest -Method Get -Uri $uri -Headers $Headers -TokenResource $fabricResource
         foreach ($workspace in $response.workspaces) {
+            if ($selectedWorkspaceIds.Count -gt 0 -and -not $selectedWorkspaceIds.Contains([string]$workspace.id)) {
+                continue
+            }
             $workspaces.Add($workspace)
             if ($WorkspaceLimit -gt 0 -and $workspaces.Count -ge $WorkspaceLimit) {
+                return $workspaces
+            }
+            if ($selectedWorkspaceIds.Count -gt 0 -and $workspaces.Count -ge $selectedWorkspaceIds.Count) {
                 return $workspaces
             }
         }

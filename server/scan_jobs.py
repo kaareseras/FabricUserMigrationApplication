@@ -36,7 +36,14 @@ class ScanManager:
                 return {"status": "idle", "progress": 0, "stage": "Klar til scanning", "logs": []}
             return {**self._job, "logs": list(self._job["logs"])}
 
-    def start(self, tenant_id: str, workspace_limit: int, include_personal: bool, include_artifacts: bool) -> dict[str, Any]:
+    def start(
+        self,
+        tenant_id: str,
+        workspace_limit: int,
+        include_personal: bool,
+        include_artifacts: bool,
+        workspace_ids: list[str] | None = None,
+    ) -> dict[str, Any]:
         shell = find_powershell()
         if shell is None:
             raise RuntimeError("PowerShell is not installed on the server.")
@@ -76,6 +83,8 @@ class ScanManager:
             "-WorkspaceLimit",
             str(workspace_limit),
         ]
+        if workspace_ids:
+            command.extend(["-WorkspaceIdsJson", json.dumps(workspace_ids)])
         if include_personal:
             command.append("-IncludePersonalWorkspaces")
         if include_artifacts:

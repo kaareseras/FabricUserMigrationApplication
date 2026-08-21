@@ -12,7 +12,8 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends ca-certificates curl gnupg \
     && curl -fsSLo /tmp/packages-microsoft-prod.deb https://packages.microsoft.com/config/debian/13/packages-microsoft-prod.deb \
     && dpkg -i /tmp/packages-microsoft-prod.deb \
-    && printf 'Types: deb\nURIs: https://packages.microsoft.com/repos/azure-cli/\nSuites: bookworm\nComponents: main\nArchitectures: %s\nSigned-by: /usr/share/keyrings/microsoft-prod.gpg\n' "$(dpkg --print-architecture)" > /etc/apt/sources.list.d/azure-cli.sources \
+    && curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor --yes -o /usr/share/keyrings/microsoft-azure-cli.gpg \
+    && printf 'Types: deb\nURIs: https://packages.microsoft.com/repos/azure-cli/\nSuites: bookworm\nComponents: main\nArchitectures: %s\nSigned-by: /usr/share/keyrings/microsoft-azure-cli.gpg\n' "$(dpkg --print-architecture)" > /etc/apt/sources.list.d/azure-cli.sources \
     && apt-get update \
     && apt-get install -y --no-install-recommends azure-cli powershell \
     && rm -rf /var/lib/apt/lists/* /tmp/packages-microsoft-prod.deb

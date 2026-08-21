@@ -4,6 +4,8 @@ These tests are hermetic: they import the fixture snapshot into a throwaway
 database and never touch the gitignored artifacts/ folder or data/ database.
 """
 
+import server.app as app_module
+
 
 def test_health_and_summary(api_client) -> None:
     health = api_client.client.get("/api/health")
@@ -105,3 +107,52 @@ def test_facets_and_coverage(api_client) -> None:
     assert coverage["covered"] == ["workspaces", "artifacts"]
     assert coverage["notCovered"] == ["personal workspaces"]
     assert coverage["apiNotes"] == ["synthetic test fixture"]
+
+
+def test_scan_inventory_forwards_tenant_and_personal_option(api_client, monkeypatch) -> None:
+    expected = {"capacities": [], "workspaceCount": 0}
+    calls = []
+    monkeypatch.setattr(
+        app_module.azure_auth_manager,
+        "scan_inventory",
+        lambda tenant_id, include_personal: calls.append((tenant_id, include_personal)) or expected,
+    )
+
+    response = api_client.client.get(
+        "/api/scans/inventory",
+        params={
+            "tenantId": "00000000-0000-0000-0000-000000000000",
+            "includePersonalWorkspaces": "true",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.json() == expected
+    assert calls == [("00000000-0000-0000-0000-000000000000", True)]
+
+
+def test_service_principal_login_forwards_validated_credentials(api_client, monkeypatch) -> None:
+    calls = []
+    expected = {"status": "authenticated", "account": {"authType": "servicePrincipal"}, "logs": []}
+    monkeypatch.setattr(
+        app_module.azure_auth_manager,
+        "login_service_principal",
+        lambda tenant_id, client_id, client_secret: calls.append((tenant_id, client_id, client_secret)) or expected,
+    )
+
+    response = api_client.client.post(
+        "/api/auth/service-principal",
+        json={
+            "tenantId": "00000000-0000-0000-0000-000000000000",
+            "clientId": "11111111-1111-1111-1111-111111111111",
+            "clientSecret": "test-secret",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.json() == expected
+    assert calls == [(
+        "00000000-0000-0000-0000-000000000000",
+        "11111111-1111-1111-1111-111111111111",
+        "test-secret",
+    )]
